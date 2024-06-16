@@ -4,8 +4,10 @@ echo "PowerMaster v0.1 - Tomas Mark 2024"
 echo "usage:"
 echo "powermaster.sh [high_performance|power_saver|ultra_power_saver|custom_power_saver] [max_freq] [Mhz|GHz]"
 
-if [ $# -eq 0 ]; then
-    echo -e "\e[31mNo param was given\e[0m"
+# Check cpu power package
+if ! dpkg -l | grep cpupower > /dev/null; then
+    echo -e "\e[31mcpupower package is not installed. Please install it first.\e[0m"
+    echo -e "\e[31mRun: sudo apt install cpupower\e[0m"
     exit 1
 fi
 
@@ -91,7 +93,7 @@ function custom_power_saver_mode {
 
 function get_cpu_limits {
     echo 
-    echo "Gettting limits for all cores ..."
+    echo "Getting limits for all cores ..."
 
     for ((i=0; i<$num_cores; i++)); do
         cpu_info=$(sudo cpupower -c $i frequency-info)
@@ -106,7 +108,7 @@ function get_cpu_limits {
 
 function get_cpu_policy {
     echo
-    echo "Gettting policy for all cores ..."
+    echo "Getting policy for all cores ..."
 
     for ((i=0; i<$num_cores; i++)); do
         cpu_info_policy=$(sudo cpupower -c $i frequency-info)
@@ -135,7 +137,8 @@ elif [ "$1" == "custom_power_saver" ]; then
     custom_power_saver_mode $2 $3
     get_cpu_policy
 else
-    echo "No param was given"
+    echo
+    echo "No param was given - only getting limits and policy"
     get_cpu_limits
     get_cpu_policy
 fi
