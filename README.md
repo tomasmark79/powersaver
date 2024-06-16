@@ -78,4 +78,4 @@ If no valid mode is provided, the script outputs the current CPU limits and poli
 
 PowerMaster is open-source software, released under the MIT License.
 
-For more information, visit the [GitHub repository](https://github.com/tomasmark/powermaster).
+For more information, visit the [GitHub repository](https://github.com/tomasmark79/powermaster).
