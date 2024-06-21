@@ -12,8 +12,9 @@ powermaster.sh [high_performance|power_saver|ultra_power_saver|custom_power_save
 
 1. **high_performance**: Sets the CPU to its maximum frequency for all cores.
 2. **power_saver**: Sets the CPU to half of its maximum frequency for all cores.
-3. **ultra_power_saver**: Sets the CPU to its minimum frequency for all cores.
-4. **custom_power_saver**: Allows you to set a custom frequency for all cores. Requires additional parameters for the maximum frequency and its unit (MHz or GHz).
+3. **minus_giga**: Sets the CPU to its maximum frequency minus one Gigahertz for all cores.
+4. **ultra_power_saver**: Sets the CPU to its minimum frequency for all cores.
+5. **custom_power_saver**: Allows you to set a custom frequency for all cores. Requires additional parameters for the maximum frequency and its unit (MHz or GHz).
 
 ## Examples
 
@@ -27,6 +28,12 @@ powermaster.sh [high_performance|power_saver|ultra_power_saver|custom_power_save
 
 ```bash
 ./powermaster.sh power_saver
+```
+
+### Minus Giga Mode
+
+```bash
+./powermaster.sh minus_giga
 ```
 
 ### Ultra Power Saver Mode
