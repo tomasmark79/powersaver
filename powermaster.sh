@@ -29,10 +29,17 @@ function convert_to_mhz {
     freq=$1
     unit=$2
     if [ "$unit" == "GHz" ]; then
-        freq=$(echo "$freq" | awk -F. '{print $1}')
-        freq=$(( freq * 1000 ))
+        
+        # Tento prevod prevadi na MHz bez desetinnych hodnot
+        # freq=$(echo "$freq" | awk -F. '{print $1}')
+        # freq=$(( freq * 1000 ))
+        
+        # Převod GHz na MHz s desetinnými hodnotami
+        freq=$(echo "$freq * 1000" | bc -l)
     fi
-    echo $freq
+    # Zaokrouhlení na celé číslo (pokud potřebujete desetinná místa, upravte printf)
+    LC_NUMERIC=C printf "%.0f\n" "$freq"
+    # echo $freq
 }
 
 function high_performance_mode {
@@ -49,11 +56,25 @@ function high_performance_mode {
 function power_saver_mode {
     echo
     echo "Setting Power Saver Mode ..."
-    echo "notice: half of maximal frequency will be set for all cores"
+    echo "notice: HALF of maximal frequency will be set for all cores"
    
     for ((i=0; i<$num_cores; i++)); do
         max_freq=$(convert_to_mhz ${max_freqs[$i]} ${max_freq_units[$i]})
         max_freq=$(( max_freq / 2 ))
+        max_freq_units="MHz"
+        echo -e -n "\e[33mAttempt to set core $i - min: ${min_freqs[$i]}${min_freq_units[$i]} - max: ${max_freq}${max_freq_units}\e[0m "
+        sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u ${max_freq}${max_freq_units}
+    done
+}
+
+function minus_giga_mode {
+    echo
+    echo "Setting Power Saver Mode ..."
+    echo "notice: maximal frequency MINUS 1Ghz will be set for all cores"
+   
+    for ((i=0; i<$num_cores; i++)); do
+        max_freq=$(convert_to_mhz ${max_freqs[$i]} ${max_freq_units[$i]})
+        max_freq=$(( max_freq - 1000 ))
         max_freq_units="MHz"
         echo -e -n "\e[33mAttempt to set core $i - min: ${min_freqs[$i]}${min_freq_units[$i]} - max: ${max_freq}${max_freq_units}\e[0m "
         sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u ${max_freq}${max_freq_units}
@@ -135,6 +156,10 @@ elif [ "$1" == "ultra_power_saver" ]; then
 elif [ "$1" == "custom_power_saver" ]; then
     get_cpu_limits
     custom_power_saver_mode $2 $3
+    get_cpu_policy
+elif [ "$1" == "minus_giga" ]; then
+    get_cpu_limits
+    minus_giga_mode
     get_cpu_policy
 else
     echo
