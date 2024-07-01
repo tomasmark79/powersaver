@@ -1,6 +1,9 @@
 # PowerMaster
 
-PowerMaster is a simple Bash script designed to manage CPU power settings on Linux systems. It allows users to switch between different power modes or set custom power modes with custom maximum frequencies for CPU cores.
+PowerMaster is a simple Shell Bash Script designed to manage CPU power frequnecies settings on Linux systems. 
+
+## Use Case
+Useful for automatic change CPU power mode regarding individual user scenarios.
 
 ## Usage
 
@@ -61,6 +64,7 @@ The number of CPU cores is determined using `nproc`.
 - `convert_to_mhz`: Converts a frequency from GHz to MHz.
 - `high_performance_mode`: Sets all cores to their maximum frequency.
 - `power_saver_mode`: Sets all cores to **half** of their maximum frequency.
+- `minus_giga`: Sets the CPU to its maximum frequency **minus one Ghz*** for all cores.
 - `ultra_power_saver_mode`: Sets all cores to their minimum frequency.
 - `custom_power_saver_mode`: Sets all cores to a user-defined frequency.
 - `get_cpu_limits`: Retrieves the hardware limits (minimum and maximum frequencies) for each core.
