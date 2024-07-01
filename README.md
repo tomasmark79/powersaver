@@ -1,6 +1,6 @@
 # PowerMaster
 
-PowerMaster is a simple Shell Bash Script designed to manage CPU power frequnecies settings on Linux systems. 
+PowerMaster is a simple Shell Bash Script designed to manage CPU power frequencies settings on Linux systems. 
 
 ## Use Case
 Useful for automatic change CPU power mode regarding individual user scenarios.
