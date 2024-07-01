@@ -1,11 +1,11 @@
-# PowerMaster - Tomas Mark 2024
+# PowerMaster
 
 PowerMaster is a simple Bash script designed to manage CPU power settings on Linux systems. It allows users to switch between different power modes or set custom power modes with custom maximum frequencies for CPU cores.
 
 ## Usage
 
 ```bash
-powermaster.sh [high_performance|minus_giga|power_saver|ultra_power_saver|custom_power_saver] [max_freq] [Mhz|GHz]
+powermaster.sh [high_performance|power_saver|minus_giga|ultra_power_saver|custom_power_saver] [max_freq] [Mhz|GHz]
 ```
 
 ## Modes
@@ -83,6 +83,7 @@ If no valid mode is provided, the script outputs the current CPU limits and poli
 
 ## License
 
-PowerMaster is open-source software, released under the MIT License.
+PowerMaster is open-source software, released under the unlicense.
+Initial author is Tomáš Mark 2024.
 
 For more information, visit the [GitHub repository](https://github.com/tomasmark79/powermaster).

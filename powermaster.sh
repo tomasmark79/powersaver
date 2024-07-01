@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "PowerMaster v0.1 - Tomas Mark 2024"
+echo "PowerMaster Shell Bash Script 0.0.1 beta"
 echo "usage:"
 echo "powermaster.sh [high_performance|power_saver|ultra_power_saver|custom_power_saver] [max_freq] [Mhz|GHz]"
 
