@@ -1,20 +1,29 @@
-# PowerMaster
+# PowerSaver
 
-PowerMaster is a simple Shell Bash Script designed to manage CPU power frequencies settings on Linux systems. 
+PowerSaver is designed to manage CPU power frequencies settings on Linux systems.
 
-## Use Case
-Useful for automatic change CPU power mode regarding individual user scenarios.
+## Why?
+
+I use this very helpfull script for switching among laptop modes. This script is giving you the power to set CPU frequencies as you wish in CPU factory limits . For laptop and othe mobile devices may be very critical to battery safe or to CPU temperature control.
+
+## Usecases
+    -   During battery I am using Mode **Half** or **Custom 1.6 Ghz**
+    -   During chargering or in dicking station I am using Mode **Mg**
+    -   During OBS streaming I am using Mode **Mg** or **Half** due video encryption is very expensive
+    -   When the laptop is almost out of power then Mode **Ultra** is very handy
+  
+Automaticaly switching is available in my Kubuntu via Kde Plasma Power Controll settings. I added this script with required parameters regarding current power mode and magic is happening. 
 
 ## Usage
 
 ```bash
-PowerMaster 2024.0821 Tomas Mark, usage:
-powermaster.sh [ max | mg | half | ultra | custom [max_freq] [Mhz|GHz] ]
+powersaver.sh [ none | mg | half | ultra | custom [max_freq] [Mhz|GHz] ]
+PowerSaver 2024.0821 Tomas Mark
 ```
 
 ## Modes
 
-1. **max**: Sets the CPU to its maximum frequency for all cores.
+1. **none**: Sets the CPU to its maximum frequency for all cores.
 2. **mg**: Sets the CPU to its maximum frequency minus one Gigahertz for each core.
 3. **half**: Sets the CPU to half of its maximum frequency for all cores.
 4. **ultra**: Sets the CPU to its minimum frequency for all cores.
@@ -22,49 +31,11 @@ powermaster.sh [ max | mg | half | ultra | custom [max_freq] [Mhz|GHz] ]
 
 ## Examples
 
-### max mode
-
 ```bash
-./powermaster.sh max
+./PowerSaver.sh mg
+./PowerSaver.sh custom 1.6 GHz
+./PowerSaver.sh custom 1800 MHz
 ```
-
-### mg mode
-
-```bash
-./powermaster.sh mg
-```
-
-### half mode
-
-```bash
-./powermaster.sh half
-```
-
-### ultra mode
-
-```bash
-./powermaster.sh ultra
-```
-
-### custom mode
-
-```bash
-./powermaster.sh custom 1.6 GHz
-# or
-./powermaster.sh custom 1800 MHz
-```
-
-## Script Explanation
-
-The script begins by displaying its version and usage instructions. It then checks if any arguments were provided. If not, it exits with an error message.
-
-The number of CPU cores is determined using `nproc`.
-
-### Main Logic
-
-Depending on the mode specified by the user, the script calls `get_cpu_limits` to retrieve the current limits and then applies the appropriate power mode settings. Finally, it calls `get_cpu_policy` to display the updated frequency policy.
-
-If no valid mode is provided, the script outputs the current CPU limits and policy.
 
 ## Requirements
 
@@ -77,7 +48,8 @@ If no valid mode is provided, the script outputs the current CPU limits and poli
 
 ## License
 
-PowerMaster is open-source software, released under the unlicense.
-Initial author is Tomáš Mark 2024.
+PowerSaver is open-source software, released under the **unlicense**. If you like this script, you may mention my name.
+
+Enjoy!
 
 For more information, visit the [GitHub repository](https://github.com/tomasmark79/powermaster).

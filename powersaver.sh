@@ -106,13 +106,14 @@ function custom_mode {
 }
 
 function get_cpu_limits {
+    hwLimitsPattern="hardware limits:"
     echo "Getting physical processor frequency limits ..."
     for ((i = 0; i < $num_cores; i++)); do
         cpu_info=$(sudo cpupower -c $i frequency-info)
-        min_freqs[$i]=$(echo "$cpu_info" | grep "hardware limits:" | awk '{print $3}')
-        min_freq_units[$i]=$(echo "$cpu_info" | grep "hardware limits:" | awk '{print $4}')
-        max_freqs[$i]=$(echo "$cpu_info" | grep "hardware limits:" | awk '{print $6}')
-        max_freq_units[$i]=$(echo "$cpu_info" | grep "hardware limits:" | awk '{print $7}')
+        min_freqs[$i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $3}')
+        min_freq_units[$i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $4}')
+        max_freqs[$i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $6}')
+        max_freq_units[$i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $7}')
         echo -e "\e[32mCore $i - min: ${min_freqs[$i]} ${min_freq_units[$i]} - max: ${max_freqs[$i]} ${max_freq_units[$i]}\e[0m"
     done
     echo
@@ -120,13 +121,14 @@ function get_cpu_limits {
 }
 
 function get_cpu_policy {
+    policyPattern="policy"
     echo "Getting physical processor frequency policies ..."
     for ((i = 0; i < $num_cores; i++)); do
         cpu_info_policy=$(sudo cpupower -c $i frequency-info)
-        min_freqs_policy[$i]=$(echo "$cpu_info_policy" | grep "policy" | awk '{print $7}')
-        min_freq_units_policy[$i]=$(echo "$cpu_info_policy" | grep "policy" | awk '{print $8}')
-        max_freqs_policy[$i]=$(echo "$cpu_info_policy" | grep "policy" | awk '{print $10}')
-        max_freq_units_policy[$i]=$(echo "$cpu_info_policy" | grep "policy" | awk '{print $11}')
+        min_freqs_policy[$i]=$(echo "$cpu_info_policy" | grep "$policyPattern" | awk '{print $7}')
+        min_freq_units_policy[$i]=$(echo "$cpu_info_policy" | grep "$policyPattern" | awk '{print $8}')
+        max_freqs_policy[$i]=$(echo "$cpu_info_policy" | grep "$policyPattern" | awk '{print $10}')
+        max_freq_units_policy[$i]=$(echo "$cpu_info_policy" | grep "$policyPattern" | awk '{print $11}')
         echo -e "\e[34mCore $i - min: ${min_freqs_policy[$i]} ${min_freq_units_policy[$i]} - max: ${max_freqs_policy[$i]} ${max_freq_units_policy[$i]}\e[0m"
     done
     echo
