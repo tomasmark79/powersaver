@@ -8,49 +8,50 @@ Useful for automatic change CPU power mode regarding individual user scenarios.
 ## Usage
 
 ```bash
-powermaster.sh [high_performance|power_saver|minus_giga|ultra_power_saver|custom_power_saver] [max_freq] [Mhz|GHz]
+PowerMaster 2024.0821 Tomas Mark, usage:
+powermaster.sh [ max | mg | half | ultra | custom [max_freq] [Mhz|GHz] ]
 ```
 
 ## Modes
 
-1. **high_performance**: Sets the CPU to its maximum frequency for all cores.
-2. **power_saver**: Sets the CPU to half of its maximum frequency for all cores.
-3. **minus_giga**: Sets the CPU to its maximum frequency minus one Gigahertz for each core.
-4. **ultra_power_saver**: Sets the CPU to its minimum frequency for all cores.
-5. **custom_power_saver**: Allows you to set a custom frequency for all cores. Requires additional parameters for the maximum frequency and its unit (MHz or GHz).
+1. **max**: Sets the CPU to its maximum frequency for all cores.
+2. **mg**: Sets the CPU to its maximum frequency minus one Gigahertz for each core.
+3. **half**: Sets the CPU to half of its maximum frequency for all cores.
+4. **ultra**: Sets the CPU to its minimum frequency for all cores.
+5. **custom**: Allows you to set a custom frequency for all cores. Requires additional parameters for the maximum frequency and its unit (MHz or GHz).
 
 ## Examples
 
-### High Performance Mode
+### max mode
 
 ```bash
-./powermaster.sh high_performance
+./powermaster.sh max
 ```
 
-### Power Saver Mode
+### mg mode
 
 ```bash
-./powermaster.sh power_saver
+./powermaster.sh mg
 ```
 
-### Minus Giga Mode
+### half mode
 
 ```bash
-./powermaster.sh minus_giga
+./powermaster.sh half
 ```
 
-### Ultra Power Saver Mode
+### ultra mode
 
 ```bash
-./powermaster.sh ultra_power_saver
+./powermaster.sh ultra
 ```
 
-### Custom Power Saver Mode
+### custom mode
 
 ```bash
-./powermaster.sh custom_power_saver 1.6 GHz
+./powermaster.sh custom 1.6 GHz
 # or
-./powermaster.sh custom_power_saver 1600 MHz
+./powermaster.sh custom 1800 MHz
 ```
 
 ## Script Explanation
@@ -58,17 +59,6 @@ powermaster.sh [high_performance|power_saver|minus_giga|ultra_power_saver|custom
 The script begins by displaying its version and usage instructions. It then checks if any arguments were provided. If not, it exits with an error message.
 
 The number of CPU cores is determined using `nproc`.
-
-### Functions
-
-- `convert_to_mhz`: Converts a frequency from GHz to MHz.
-- `high_performance_mode`: Sets all cores to their maximum frequency.
-- `power_saver_mode`: Sets all cores to **half** of their maximum frequency.
-- `minus_giga`: Sets the CPU to its maximum frequency **minus one Ghz*** for all cores.
-- `ultra_power_saver_mode`: Sets all cores to their minimum frequency.
-- `custom_power_saver_mode`: Sets all cores to a user-defined frequency.
-- `get_cpu_limits`: Retrieves the hardware limits (minimum and maximum frequencies) for each core.
-- `get_cpu_policy`: Retrieves the current frequency policy (minimum and maximum frequencies) for each core.
 
 ### Main Logic
 

@@ -1,8 +1,9 @@
 #!/bin/bash
 
-echo "PowerMaster Shell Bash Script 0.0.1 beta"
-echo "usage:"
-echo "powermaster.sh [high_performance|power_saver|ultra_power_saver|custom_power_saver] [max_freq] [Mhz|GHz]"
+echo "PowerMaster 2024.0821 Tomas Mark, usage:"
+echo -e "powermaster.sh [ \e[31mmax\e[0m | \e[33mmg\e[0m | \e[32mhalf\e[0m | \e[34multra\e[0m | \e[35mcustom [max_freq] [Mhz|GHz]\e[0m ]"
+
+
 
 # Check cpu power package
 if ! dpkg -l | grep cpupower > /dev/null; then
@@ -13,7 +14,7 @@ fi
 
 num_cores=$(nproc)
 echo
-echo -e "\e[35mCPU Cores: $num_cores Mode Requested: $1\e[0m"
+echo -e "\e[35m$num_cores cpu cores detected $1\e[0m"
 
 declare -a min_freqs
 declare -a min_freq_units
@@ -42,9 +43,9 @@ function convert_to_mhz {
     # echo $freq
 }
 
-function high_performance_mode {
+function max_mode {
     echo
-    echo "Setting High Performance Mode ..."
+    echo "Setting Max Mode ..."
     echo "notice: maximal frequency will be set for all cores"
 
     for ((i=0; i<$num_cores; i++)); do
@@ -53,10 +54,10 @@ function high_performance_mode {
     done
 }
 
-function power_saver_mode {
+function half_mode {
     echo
-    echo "Setting Power Saver Mode ..."
-    echo "notice: HALF of maximal frequency will be set for all cores"
+    echo "Setting Half Mode ..."
+    echo "notice: one half of maximal frequency will be set for all cores"
    
     for ((i=0; i<$num_cores; i++)); do
         max_freq=$(convert_to_mhz ${max_freqs[$i]} ${max_freq_units[$i]})
@@ -67,9 +68,9 @@ function power_saver_mode {
     done
 }
 
-function minus_giga_mode {
+function mg_mode {
     echo
-    echo "Setting Power Saver Mode ..."
+    echo "Setting Minus Giga Mode ..."
     echo "notice: maximal frequency MINUS 1Ghz will be set for all cores"
    
     for ((i=0; i<$num_cores; i++)); do
@@ -81,7 +82,7 @@ function minus_giga_mode {
     done
 }
 
-function ultra_power_saver_mode {
+function ultra_mode {
     echo
     echo "Setting Ultra Power Saver Mode ..."
     echo "notice: minimal frequency will be set for all cores"
@@ -93,15 +94,15 @@ function ultra_power_saver_mode {
 }
 
 # params $1 - max frequency, $2 - unit
-function custom_power_saver_mode {
+function custom_mode {
     echo
     echo "Setting Custom Power Saver Mode ..."
     echo "notice: custom frequency will be set for all cores"
 
     if [ -z "$1" ] || [ -z "$2" ]; then
         echo -e "\e[31mMissing second or third param for max frequency and its unit.\e[0m"
-        echo -e "\e[31mExample: ./powermaster.sh custom_power_saver 1.6 Ghz\e[0m - space requited between parameters!"
-        echo -e "\e[31mExample: ./powermaster.sh custom_power_saver 1600 Mhz\e[0m - space requited between parameters!"
+        echo -e "\e[31mExample: ./powermaster.sh custom_power_saver 1.6 Ghz\e[0m - space char required between freq number and unit!"
+        echo -e "\e[31mExample: ./powermaster.sh custom_power_saver 1600 Mhz\e[0m - space char required between freq number and unit!"
         echo -e "\e[31mSettings Aborted!\e[0m"
         return
     fi
@@ -141,29 +142,28 @@ function get_cpu_policy {
     done
 }
 
-if [ "$1" == "high_performance" ]; then
+if [ "$1" == "max" ]; then
     get_cpu_limits
-    high_performance_mode
+    max_mode
     get_cpu_policy
-elif [ "$1" == "power_saver" ]; then
+elif [ "$1" == "half" ]; then
     get_cpu_limits
-    power_saver_mode
+    half_mode
     get_cpu_policy
-elif [ "$1" == "ultra_power_saver" ]; then
+elif [ "$1" == "ultra" ]; then
     get_cpu_limits
-    ultra_power_saver_mode
+    ultra_mode
     get_cpu_policy
-elif [ "$1" == "custom_power_saver" ]; then
+elif [ "$1" == "custom" ]; then
     get_cpu_limits
-    custom_power_saver_mode $2 $3
+    custom_mode $2 $3
     get_cpu_policy
-elif [ "$1" == "minus_giga" ]; then
+elif [ "$1" == "mg" ]; then
     get_cpu_limits
-    minus_giga_mode
+    mg_mode
     get_cpu_policy
 else
-    echo
-    echo "No param was given - only getting limits and policy"
+    echo "No param was given, getting limits and policy for all cores ..."
     get_cpu_limits
     get_cpu_policy
 fi
