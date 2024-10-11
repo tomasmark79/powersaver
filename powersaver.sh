@@ -144,7 +144,7 @@ function getCpuInfo {
     echo
 }
 
-if [[ "$1" == "none" || "$1" == "n" ]]; then
+if [[ "$1" == "none" || "$1" == "n" || "$1" == "--none" || "$1" == "-n" ]]; then
     required_mode="None"
     getCpuInfo
     get_cpu_limits
@@ -152,7 +152,7 @@ if [[ "$1" == "none" || "$1" == "n" ]]; then
     print_notify "$required_mode"
     none_mode
     get_cpu_policy
-elif [[ "$1" == "mg" || "$1" == "m" ]]; then
+elif [[ "$1" == "mg" || "$1" == "m" || "$1" == "--mg" || "$1" == "-m" ]]; then
     required_mode="Mg"
     getCpuInfo
     get_cpu_limits
@@ -160,7 +160,7 @@ elif [[ "$1" == "mg" || "$1" == "m" ]]; then
     print_notify "$required_mode"
     mg_mode
     get_cpu_policy
-elif [[ "$1" == "half" || "$1" == "h" ]]; then
+elif [[ "$1" == "half" || "$1" == "h" || "$1" == "--half" || "$1" == "-h" ]]; then
     required_mode="Half"
     getCpuInfo
     get_cpu_limits
@@ -168,7 +168,7 @@ elif [[ "$1" == "half" || "$1" == "h" ]]; then
     print_notify "$required_mode"
     half_mode
     get_cpu_policy
-elif [[ "$1" == "ultra" || "$1" == "u" ]]; then
+elif [[ "$1" == "ultra" || "$1" == "u" || "$1" == "--ultra" || "$1" == "-u" ]]; then
     required_mode="Ultra"
     getCpuInfo
     get_cpu_limits
@@ -176,7 +176,7 @@ elif [[ "$1" == "ultra" || "$1" == "u" ]]; then
     print_notify "$required_mode"
     ultra_mode
     get_cpu_policy
-elif [[ "$1" == "custom" || "$1" == "c" ]]; then
+elif [[ "$1" == "custom" || "$1" == "c" || "$1" == "--custom" || "$1" == "-c" ]]; then
     required_mode="Custom"
     getCpuInfo
     get_cpu_limits
