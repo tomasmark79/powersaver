@@ -51,11 +51,11 @@ function convert_to_mhz {
 }
 
 function print_notify {
-    notify-send -u low -i $notifyIconPath "$appName" "Mode: $1"
+    notify-send -u low -i $notifyIconPath "CPU Mode" "$1"
 }
 
 function print_notify_governor {
-    notify-send -u low -i $notifyIconPath "$appName" "Governor: $1"
+    notify-send -u low -i $notifyIconPath "CPU Governor" "$1"
 }
 
 
