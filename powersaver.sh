@@ -9,8 +9,8 @@ settingMode="CPU Frequency Mode to"
 notifyIconPath="/home/tomas/Obrázky/Ikony/desktop-application.png"
 
 # help
-usage="powersaver.sh [ none | mg | half | ultra | custom [max_freq] [Mhz|GHz] ]"
-usageColored="powersaver.sh [ \e[31mnone\e[0m | \e[33mmg\e[0m | \e[32mhalf\e[0m | \e[34multra\e[0m | \e[35mcustom [max_freq] [Mhz|GHz]\e[0m ]"
+usage="powersaver.sh [ none | mg | half | ultra | custom [max_freq] [Mhz|GHz] ] | [powersafe | performance]"
+usageColored="powersaver.sh [ \e[31mnone\e[0m | \e[33mmg\e[0m | \e[32mhalf\e[0m | \e[34multra\e[0m | \e[35mcustom [max_freq] [Mhz|GHz]\e[0m ] | [powersafe | performance]"
 
 # dependencies
 if ! dpkg -l | grep cpupower >/dev/null; then
@@ -53,6 +53,8 @@ function convert_to_mhz {
 function print_notify {
     notify-send -u low -i $notifyIconPath "$appName" "Mode: $1"
 }
+
+
 
 function none_mode {
     for ((i = 0; i < $num_cores; i++)); do
@@ -143,6 +145,14 @@ function getCpuInfo {
     cat /proc/cpuinfo | grep 'name' | uniq
     echo
 }
+
+if [[ "$1" == "powersave" || "$1" == "performance" ]]; then
+    echo -n $1 | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+fi
+
+if [[ "$2" == "powersave" || "$2" == "performance" ]]; then
+    echo -n $2 | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+fi
 
 if [[ "$1" == "none" || "$1" == "n" || "$1" == "--none" || "$1" == "-n" ]]; then
     required_mode="None"
