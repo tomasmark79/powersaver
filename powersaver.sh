@@ -54,6 +54,9 @@ function print_notify {
     notify-send -u low -i $notifyIconPath "$appName" "Mode: $1"
 }
 
+function print_notify_governor {
+    notify-send -u low -i $notifyIconPath "$appName" "Governor: $1"
+}
 
 
 function none_mode {
@@ -146,17 +149,28 @@ function getCpuInfo {
     echo
 }
 
-if [[ "$1" == "powersave" || "$1" == "performance" ]]; then
-    echo -n $1 | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-fi
+function getGovernor {
+    echo "Getting physical processor governors ..."
+    for ((i = 0; i < $num_cores; i++)); do
+        echo "Core $i - $(cat /sys/devices/system/cpu/cpu$i/cpufreq/scaling_governor)"
+    done
+    echo
+}
 
-if [[ "$2" == "powersave" || "$2" == "performance" ]]; then
-    echo -n $2 | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-fi
+valid_governons=("powersave" "performance" "ondemand" "conservative")
+for arg in "$@"; do
+    for param in "${valid_governons[@]}"; do
+        if [[ "$arg" == "$param" ]]; then
+            echo -n $arg | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+            print_notify_governor "$arg"
+        fi
+    done
+done
 
 if [[ "$1" == "none" || "$1" == "n" || "$1" == "--none" || "$1" == "-n" ]]; then
     required_mode="None"
     getCpuInfo
+    getGovernor
     get_cpu_limits
     echo "$settingMode $required_mode"
     print_notify "$required_mode"
@@ -165,6 +179,7 @@ if [[ "$1" == "none" || "$1" == "n" || "$1" == "--none" || "$1" == "-n" ]]; then
 elif [[ "$1" == "mg" || "$1" == "m" || "$1" == "--mg" || "$1" == "-m" ]]; then
     required_mode="Mg"
     getCpuInfo
+    getGovernor
     get_cpu_limits
     echo "$settingMode $required_mode"
     print_notify "$required_mode"
@@ -173,6 +188,7 @@ elif [[ "$1" == "mg" || "$1" == "m" || "$1" == "--mg" || "$1" == "-m" ]]; then
 elif [[ "$1" == "half" || "$1" == "h" || "$1" == "--half" || "$1" == "-h" ]]; then
     required_mode="Half"
     getCpuInfo
+    getGovernor
     get_cpu_limits
     echo "$settingMode $required_mode"
     print_notify "$required_mode"
@@ -181,6 +197,7 @@ elif [[ "$1" == "half" || "$1" == "h" || "$1" == "--half" || "$1" == "-h" ]]; th
 elif [[ "$1" == "ultra" || "$1" == "u" || "$1" == "--ultra" || "$1" == "-u" ]]; then
     required_mode="Ultra"
     getCpuInfo
+    getGovernor
     get_cpu_limits
     echo "$settingMode $required_mode"
     print_notify "$required_mode"
@@ -189,6 +206,7 @@ elif [[ "$1" == "ultra" || "$1" == "u" || "$1" == "--ultra" || "$1" == "-u" ]]; 
 elif [[ "$1" == "custom" || "$1" == "c" || "$1" == "--custom" || "$1" == "-c" ]]; then
     required_mode="Custom"
     getCpuInfo
+    getGovernor
     get_cpu_limits
     echo "$settingMode $required_mode $2 $3"
     print_notify "$required_mode $2 $3"
@@ -198,6 +216,7 @@ else
     required_mode="Only Print Informations"
     echo -e $usageColored
     getCpuInfo
+    getGovernor
     get_cpu_limits
     get_cpu_policy
 fi
