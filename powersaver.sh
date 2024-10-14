@@ -259,7 +259,6 @@ fi
 
 get_cpu_info
 get_cpu_limits
-get_cpu_policy
 
 # $1 - --cpu-profile
 # $2 - max | minusgiga | half | min | custom
