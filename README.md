@@ -59,7 +59,7 @@
 
 ### Display CPU Info and Limits
 
-If no arguments are provided, the script will display the current CPU model, frequency limits, and active governors:
+If no arguments are provided, the script will display the current CPU model, frequency limits, current frequency policy, and active governors:
 
 ```bash
 ./powersaver.sh

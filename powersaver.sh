@@ -31,7 +31,7 @@ function get_cpu_info {
 
 function get_cpu_limits {
     echo
-    echo "Getting current cpu limits ..."
+    echo "Getting factory cpu limits ..."
     hwLimitsPattern="hardware limits:"
     for ((i = 0; i < $num_cores; i++)); do
         cpu_info=$(sudo cpupower -c $i frequency-info)
@@ -208,6 +208,8 @@ if [ "$#" -eq 0 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     echo -e "\e[31mNo arguments provided.\e[0m"
     get_cpu_info
     get_cpu_limits
+    get_cpu_policy
+    get_governor
     exit 1
 fi
 
@@ -257,6 +259,7 @@ fi
 
 get_cpu_info
 get_cpu_limits
+get_cpu_policy
 
 # $1 - --cpu-profile
 # $2 - max | minusgiga | half | min | custom
