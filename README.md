@@ -4,6 +4,9 @@
 
 ## Features
 
+<img width="629" alt="image" src="https://github.com/user-attachments/assets/5404c6d4-a5ff-4daa-a0c3-1cfd2f345fbf">
+
+
 - **View CPU Info:** Displays the CPU model, core count, and current frequency limits.
 - **Predefined Profiles:**
   - **User Profiles:** Fire, Work, Relax, Out of Office (OOO), Time Is Gold.
