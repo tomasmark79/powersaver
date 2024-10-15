@@ -25,7 +25,7 @@ function check_self_update {
     fi
 }
 
-function clone_self {
+function create_repository {
     local url="https://github.com/tomasmark79/powersaver.git"
     local script_name=$(basename "$0")
     echo "Downloading script from $url..."
@@ -46,9 +46,9 @@ function clone_self {
 function update_script {
     if [ -d .git ]; then
         echo "Checking for script updates via git..."
-        check_self
+        check_self_update
     else
-        download_script
+        create_repository
     fi
 }
 
