@@ -307,7 +307,7 @@ get_cpu_limits
 # $2 - max | minusgiga | half | min | custom
 # $3 - max_freq
 # $4 - Mhz | GHz
-if [[ "$1" == "--cpu-profile" ]]; then
+if [[ "$1" == "--cpu-profile" || "$1" == "-cp" ]]; then
     valid_cpu_profiles=("max" "minusgiga" "half" "min" "custom")
     for index_cpu_profile in "${valid_cpu_profiles[@]}"; do
         if [[ "$2" == "$index_cpu_profile" ]]; then
