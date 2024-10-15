@@ -26,6 +26,7 @@ if [ "$1" = "--update" ]; then
     fi
 
     if [ ! -d .git ] || [ $? -ne 0 ]; then
+        echo "Git repository not found. Cloning new one..."
         timestamp=$(date +"%Y%m%d_%H%M%S")
         new_dir="$(dirname "$SCRIPT_DIR")/"$timestamp"_old_powersaver"
         mkdir -p "$new_dir"
