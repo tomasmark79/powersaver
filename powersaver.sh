@@ -11,29 +11,30 @@ num_cores=$(nproc --all)
 # Functions pattern
 # -------------------------------------------------------------------------------------
 
+git_update() {
+    if [ "$1" = "--update" ]; then
+        cd "$SCRIPT_DIR" || exit 1
 
-update_script() {
-    TIMESTAMP=$(date +"%Y%m%d%H%M%S")
-    BACKUP_DIR="${SCRIPT_DIR}_backup_$TIMESTAMP"
-
-    if [ -d "$SCRIPT_DIR" ] && [ "$(ls -A $SCRIPT_DIR)" ]; then
-        if [ -d "$SCRIPT_DIR/.git" ]; then
-            cd "$SCRIPT_DIR"
-            if git pull; then
-                echo "Repository successfully updated."
-                return
+        if [ -d .git ]; then
+            echo "Aktualizuji existující repozitář..."
+            if git pull origin main; then
+                echo "Aktualizace úspěšná."
             else
-                echo "Repository is broken. Creating a backup and cloning again..."
+                echo "Aktualizace selhala. Pokusím se o nové klonování..."
+                cd ..
+                rm -rf "$SCRIPT_DIR"
+                git clone "$REPO_URL" "$SCRIPT_DIR"
             fi
         else
-            echo "Directory exists and is not empty. Creating a backup and cloning again..."
+            echo "Git repozitář nenalezen. Klonuji nový..."
+            cd ..
+            rm -rf "$SCRIPT_DIR"
+            git clone "$REPO_URL" "$SCRIPT_DIR"
         fi
-        cd ..
-        mv "$SCRIPT_DIR" "$BACKUP_DIR"
-    fi
 
-    echo "Cloning repository from GitHub..."
-    git clone "$REPO_URL" "$SCRIPT_DIR"
+        echo "Aktualizace dokončena."
+        exit 0
+    fi
 }
 
 # Check if the --update parameter was provided
