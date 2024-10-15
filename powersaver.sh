@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Get number of cpu cores
 num_cores=$(nproc --all)
 
@@ -7,65 +10,38 @@ num_cores=$(nproc --all)
 # Functions pattern
 # -------------------------------------------------------------------------------------
 
-function create_repository {
-    local url="https://github.com/tomasmark79/powersaver.git"
-    local script_name=$(basename "$0")
-    local backup_dir="backup_$(date +%s)"
-    echo "Downloading script from $url..."
+#!/bin/bash
 
-    if [ -d .git ]; then
-        echo "Already a git repository. Pulling updates..."
-        git pull origin main || { echo "Failed to pull updates"; exit 1; }
-    else
-        if [ "$(ls -A . 2>/dev/null)" ]; then
-            echo "Directory is not empty. Creating backup and cloning repository..."
-            mkdir "$backup_dir" || { echo "Failed to create backup directory"; exit 1; }
+#!/bin/bash
 
-            shopt -s dotglob extglob
-            mv -- !(backup_*) "$backup_dir" || { echo "Failed to move files to backup"; exit 1; }
-            shopt -u dotglob extglob
+# Funkce pro aktualizaci skriptu
+update_script() {
+    REPO_URL="git@github.com:tomasmark79/powersaver.git"  # URL repozitáře
+    SCRIPT_DIR=$(pwd)
 
-            git clone "$url" . || { echo "Failed to clone repository"; exit 1; }
-            mv "$backup_dir"/* . || { echo "Failed to move files back from backup"; exit 1; }
+    # Kontrola, zda se jedná o git repozitář
+    if [ -d ".git" ]; then
+        echo "Jedná se o git repozitář. Pokouším se o git pull..."
+        if git pull; then
+            echo "Repozitář byl úspěšně aktualizován."
         else
-            echo "Not a git repository. Cloning repository..."
-            git clone "$url" . || { echo "Failed to clone repository"; exit 1; }
+            echo "Chyba při provádění git pull. Zkouším znovu naklonovat repozitář."
+            rm -rf .git  # Smažeme poškozený git repozitář
+            git clone "$REPO_URL" "$SCRIPT_DIR"
         fi
-    fi
-
-    chmod +x "$script_name" || { echo "Failed to make script executable"; exit 1; }
-    echo "Script updated from $url, exiting..."
-    exit 0
-}
-
-
-function pull_updates {
-    # Fetch changes without merging
-    git fetch origin main || { echo "Failed to fetch changes"; exit 1; }
-
-    # Check if there are updates to be pulled
-    UPSTREAM=${1:-'@{u}'}
-    LOCAL=$(git rev-parse @) || { echo "Failed to get local revision"; exit 1; }
-    REMOTE=$(git rev-parse "$UPSTREAM") || { echo "Failed to get remote revision"; exit 1; }
-
-    if [ "$LOCAL" != "$REMOTE" ]; then
-        echo "git pull: content updated, exiting..."
-        git pull --ff-only || { echo "Failed to pull changes"; exit 1; }
-        exit 0
     else
-        echo "Already up to date."
+        echo "Chybí git repozitář. Klonuji z GitHubu..."
+        git clone "$REPO_URL" "$SCRIPT_DIR"
     fi
 }
 
-# Check if the first argument is 'update'
+# Kontrola, zda byl zadán parametr --update
 if [ "$1" == "--update" ]; then
-    if [ -d .git ]; then
-        echo "Checking for script updates via git..."
-        pull_updates
-    else
-        create_repository
-    fi
+    update_script
 fi
+
+
+
 
 function convert_to_mhz {
     freq=$1
@@ -238,7 +214,7 @@ function check_and_set_governor {
 # Main entry point
 # -------------------------------------------------------------------------------------
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 
 # Check if cpupower package is installed
 if ! dpkg -l | grep cpupower >/dev/null; then
