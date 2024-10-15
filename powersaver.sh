@@ -26,12 +26,13 @@ if [ "$1" = "--update" ]; then
     fi
 
     if [ ! -d .git ] || [ $? -ne 0 ]; then
-        cd ..
         timestamp=$(date +"%Y%m%d_%H%M%S")
         new_dir="$(dirname "$SCRIPT_DIR")/"$timestamp"_old_powersaver"
         mkdir -p "$new_dir"
         mv "$SCRIPT_DIR" "$new_dir"
         git clone "$REPO_URL" "$SCRIPT_DIR"
+        
+
     fi
 
     echo "Update completed."
