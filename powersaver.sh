@@ -13,21 +13,16 @@ function create_repository {
     local backup_dir="backup_$(date +%s)"
     echo "Downloading script from $url..."
 
-    if [ -d .git ]; then
-        echo "Already a git repository. Pulling updates..."
-        git pull origin main
+    if [ "$(ls -A .)" ]; then
+        echo "Directory is not empty. Creating backup and cloning repository..."
+        mkdir "$backup_dir"
+        mv * "$backup_dir"
+        git clone "$url" .
+        mv "$backup_dir"/* .
+        rmdir "$backup_dir"
     else
-        if [ "$(ls -A .)" ]; then
-            echo "Directory is not empty. Creating backup and cloning repository..."
-            mkdir "$backup_dir"
-            mv * "$backup_dir"
-            git clone "$url" .
-            mv "$backup_dir"/* .
-            rmdir "$backup_dir"
-        else
-            echo "Not a git repository. Cloning repository..."
-            git clone "$url" .
-        fi
+        echo "Not a git repository. Cloning repository..."
+        git clone "$url" .
     fi
 
     chmod +x "$script_name"
