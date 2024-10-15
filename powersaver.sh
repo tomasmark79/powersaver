@@ -13,7 +13,10 @@ num_cores=$(nproc --all)
 
 function update {
 
-    original_dir=$SCRIPT_DIR
+    #original_dir=$SCRIPT_DIR
+    original_dir=$(pwd)
+    
+    cd "$SCRIPT_DIR" || exit 1
 
     git_pull_status=0
     # Check if the script is in a git repository
@@ -47,9 +50,8 @@ function update {
 
     echo "Update completed."
 
-    cd "$original_dir"
+    cd "$original_dir" || exit 1
     exit 0
-
 }
 
 
