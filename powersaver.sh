@@ -7,6 +7,59 @@ num_cores=$(nproc --all)
 # Functions pattern
 # -------------------------------------------------------------------------------------
 
+function check_self_update {
+    # Fetch changes without merging
+    git fetch origin main
+
+    # Check if there are updates to be pulled
+    UPSTREAM=${1:-'@{u}'}
+    LOCAL=$(git rev-parse @)
+    REMOTE=$(git rev-parse "$UPSTREAM")
+
+    if [ "$LOCAL" != "$REMOTE" ]; then
+        echo "git pull: content updated, exiting ..."
+        git pull --ff-only
+        exit 1
+    else
+        echo "Already up to date."
+    fi
+}
+
+function clone_self {
+    local url="https://github.com/tomasmark79/powersaver.git"
+    local script_name=$(basename "$0")
+    echo "Downloading script from $url..."
+
+    if [ -d .git ]; then
+        echo "Already a git repository. Pulling updates..."
+        git pull origin main
+    else
+        echo "Not a git repository. Cloning repository..."
+        git clone "$url" .
+    fi
+
+    chmod +x "$script_name"
+    echo "Script updated from $url, exiting..."
+    exit 1
+}
+
+function update_script {
+    if [ -d .git ]; then
+        echo "Checking for script updates via git..."
+        check_self_update
+    else
+        download_script
+    fi
+}
+
+# Check if the first argument is 'update'
+if [ "$1" == "--update" ]; then
+    update_script
+else
+    echo "No update requested."
+    # Add your main script logic here
+fi
+
 function convert_to_mhz {
     freq=$1
     unit=$2
@@ -200,7 +253,6 @@ usage="powersaver.sh [options]\n\
 --user-profile [ fire | work | relax | ooo | timeisgold ]\n\
 --cpu-profile [ max | minusgiga | half | min | custom [max_freq] [Mhz|GHz] ]\n\
 --governor [ powersave | performance ]"
-
 
 if [ "$#" -eq 0 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     echo -e "$usage"
