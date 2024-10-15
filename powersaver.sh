@@ -12,9 +12,18 @@ num_cores=$(nproc --all)
 # -------------------------------------------------------------------------------------
 
 update_script() {
-    if [ -d ".git" ]; then
+    TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+    BACKUP_DIR="${SCRIPT_DIR}_backup_$TIMESTAMP"
+
+    if [ -d "$SCRIPT_DIR/.git" ]; then
+        cd "$SCRIPT_DIR"
         if git pull; then
             echo "Repository successfully updated."
+        else
+            echo "Repository is broken. Creating a backup and cloning again..."
+            cd ..
+            mv "$SCRIPT_DIR" "$BACKUP_DIR"
+            git clone "$REPO_URL" "$SCRIPT_DIR"
         fi
     else
         echo "Git repository is missing. Cloning from GitHub..."
