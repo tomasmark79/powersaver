@@ -24,7 +24,7 @@ if [ "$1" = "--update" ]; then
             echo "Update failed. Attempting to clone anew..."
             cd ..
 
-            new_dir="$(dirname "$SCRIPT_DIR")/{$timestamp}_old_powersaver"
+            new_dir="$(dirname "$SCRIPT_DIR")/"$timestamp"_old_powersaver"
             mkdir -p "$new_dir"
             mv "$SCRIPT_DIR" "$new_dir"
 
@@ -34,7 +34,7 @@ if [ "$1" = "--update" ]; then
         echo "Git repository not found. Cloning new one..."
         cd ..
 
-        new_dir="$(dirname "$SCRIPT_DIR")/{$timestamp}_old_powersaver"
+        new_dir="$(dirname "$SCRIPT_DIR")/"$timestamp"_old_powersaver"
         mkdir -p "$new_dir"
         mv "$SCRIPT_DIR" "$new_dir"
 
