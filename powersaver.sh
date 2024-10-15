@@ -41,16 +41,17 @@ function update {
         mkdir -p "$new_dir"
         mv "$SCRIPT_DIR" "$new_dir"
         git clone "$REPO_URL" "$SCRIPT_DIR"
-        cd .
+        cd "$SCRIPT_DIR"
     fi
 
     echo "Update completed."
-    cd ..
-    cd "$SCRIPT_DIR" && ls -la
-    exit 0
+    ls -la
 }
 
-
+# Check if script is called with --update argument
+if [ "$1" = "--update" ]; then
+    update
+fi
 
 function convert_to_mhz {
     freq=$1
@@ -223,10 +224,7 @@ function check_and_set_governor {
 # Main entry point
 # -------------------------------------------------------------------------------------
 
-# Check if script is called with --update argument
-if [ "$1" = "--update" ]; then
-    update
-fi
+
 
 # Check if cpupower package is installed
 if ! dpkg -l | grep cpupower >/dev/null; then
