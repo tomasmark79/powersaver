@@ -38,6 +38,9 @@ if [ "$1" = "--update" ]; then
         mkdir -p "$new_dir"
         mv "$SCRIPT_DIR" "$new_dir"
         git clone "$REPO_URL" "$SCRIPT_DIR"
+        cd ..
+        cd ..
+        cd powersaver
     fi
 
     echo "Update completed."
