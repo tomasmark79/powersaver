@@ -12,34 +12,27 @@ num_cores=$(nproc --all)
 # -------------------------------------------------------------------------------------
 
 if [ "$1" = "--update" ]; then
+    
+    git_pull_status=0
+    
     if [ -d .git ]; then
         echo "Updating existing repository..."
         # Restore deleted files
         git restore --source=HEAD --staged --worktree .
+        
         if git pull origin main; then
             echo "Update successful."
         else
             echo "Update failed. Attempting to clone a new..."
+            git_pull_status=1
         fi
     else
         echo "Git repository not found. Cloning new one..."
+        git_pull_status=1
     fi
     
-    # Check if .git directory exists
-    if [ ! -d .git ]; then
-        echo ".git directory does not exist."
-    else
-        echo ".git directory exists."
-    fi
-
-    # Check the status of the last command
-    if [ $? -ne 0 ]; then
-        echo "Last command failed with status $?."
-    else
-        echo "Last command succeeded with status $?."
-    fi
-
-    if [ ! -d .git ] || [ $? -ne 0 ]; then
+    if [ ! -d .git ] || [ $git_pull_status -ne 0 ]; then
+        cd ..
         timestamp=$(date +"%Y%m%d_%H%M%S")
         new_dir="$(dirname "$SCRIPT_DIR")/$timestamp"
         mkdir -p "$new_dir"
