@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=PowerSaver Ooo
+Exec=/home/tomas/dev/bash/powersaver/powersaver.sh -up ooo
+Icon=/home/tomas/dev/bash/powersaver/cpu.png
+Type=Application
+Terminal=false
+

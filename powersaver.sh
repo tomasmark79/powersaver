@@ -106,15 +106,6 @@ function get_cpu_policy {
     done
 }
 
-# function set_max_mode {
-#     echo "Setting max cpu limits ..."
-#     for ((i = 0; i < $num_cores; i++)); do
-#         echo -e -n "\e[33mForce to set core $i - min: ${min_freqs[$i]}${min_freq_units[$i]} - max: ${max_freqs[$i]}${max_freq_units[$i]}\e[0m "
-#         sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u ${max_freqs[$i]}${max_freq_units[$i]}
-#     done
-#     echo
-# }
-
 function print_notify {
     icon=$SCRIPT_DIR/cpu.png
     if [ -z "$SUDO_USER" ]; then
@@ -132,8 +123,8 @@ function check_and_set_max_limits {
             sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u ${max_freqs[$i]}${max_freq_units[$i]}
         done
         echo
+        notify_message="Maximum core limits successfully set.\n"
     fi
-
 }
 
 function check_and_set_minusgiga_limits {
@@ -147,6 +138,7 @@ function check_and_set_minusgiga_limits {
             sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u ${max_freq}${max_freq_units}
         done
         echo
+        notify_message="Minus giga core limits successfully set.\n"
     fi
 }
 
@@ -161,6 +153,7 @@ function check_and_set_half_limits {
             sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u ${max_freq}${max_freq_units}
         done
         echo
+        notify_message="Half core limits successfully set.\n"
     fi
 }
 
@@ -172,6 +165,7 @@ function check_and_set_min_limits {
             sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u ${min_freqs[$i]}${min_freq_units[$i]}
         done
         echo
+        notify_message="Minimal core limits successfully set.\n"
     fi
 }
 
@@ -192,6 +186,7 @@ function check_and_set_custom_limits {
             sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u $2$3
         done
         echo
+        notify_message="Cores limits to $notify_message $2 $3 $4 successfully set.\n"
     fi
 }
 
@@ -217,6 +212,7 @@ function check_and_set_governor {
                         echo -n ${!next_arg_index} | sudo tee /sys/devices/system/cpu/cpu$i/cpufreq/scaling_governor >/dev/null
                         echo -e "\e[36mCore $i setting governor to ${!next_arg_index}\e[0m"
                     done
+                    notify_message="$notify_message governor ${!next_arg_index}"
                 fi
             done
         fi
@@ -226,8 +222,6 @@ function check_and_set_governor {
 # -------------------------------------------------------------------------------------
 # Main entry point
 # -------------------------------------------------------------------------------------
-
-
 
 # Check if cpupower package is installed
 if ! dpkg -l | grep cpupower >/dev/null; then
@@ -262,6 +256,7 @@ if [ "$#" -eq 0 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
 fi
 
 future_argument=""
+notify_message=""
 
 # $1 - --user-profile
 # $2 - fire | work | relax | ooo | timeisgold
@@ -270,7 +265,7 @@ if [[ "$1" == "--user-profile" || "$1" == "-up" ]]; then
     for index_user_profile in "${valid_user_profiles[@]}"; do
         if [[ "$2" == "$index_user_profile" ]]; then
 
-            # echo -e "\e[33mSetting $1 $2\e[0m"
+            print_notify "PowerSaver" "Setting $2 profile."
 
             # fire
             if [[ "$2" == "fire" ]]; then
@@ -316,15 +311,24 @@ if [[ "$1" == "--cpu-profile" ]]; then
     valid_cpu_profiles=("max" "minusgiga" "half" "min" "custom")
     for index_cpu_profile in "${valid_cpu_profiles[@]}"; do
         if [[ "$2" == "$index_cpu_profile" ]]; then
+
             check_and_set_max_limits $2
             check_and_set_minusgiga_limits $2
             check_and_set_half_limits $2
             check_and_set_min_limits $2
             check_and_set_custom_limits $2 $3 $4
             get_cpu_policy
+
+            
         fi
     done
 fi
 
 get_governor
 check_and_set_governor $@
+
+print_notify "PowerSaver" "$notify_message"
+
+
+
+

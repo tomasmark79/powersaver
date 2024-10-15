@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=PowerSaver Relax
+Exec=/home/tomas/dev/bash/powersaver/powersaver.sh -up relax
+Icon=/home/tomas/dev/bash/powersaver/cpu.png
+Type=Application
+Terminal=false
+
