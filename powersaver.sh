@@ -13,6 +13,8 @@ num_cores=$(nproc --all)
 
 function update {
 
+    original_dir=$SCRIPT_DIR
+
     git_pull_status=0
     # Check if the script is in a git repository
     if [ -d .git ]; then
@@ -33,18 +35,19 @@ function update {
 
     # broken structure of git repository will cause to clone new one
     if [ ! -d .git ] || [ $git_pull_status -ne 0 ]; then
+        
+        # backup store to timestamp directory about one level up
         cd ..
         timestamp=$(date +"%Y%m%d_%H%M%S")
         new_dir="$(dirname "$SCRIPT_DIR")/$timestamp"
         mkdir -p "$new_dir"
         mv "$SCRIPT_DIR" "$new_dir"
         git clone "$REPO_URL" "$SCRIPT_DIR"
-        cd ..
-        cd ..
-
     fi
 
     echo "Update completed."
+
+    cd "$original_dir"
     exit 0
 
 }
