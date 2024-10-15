@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 
+#
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_URL="https://github.com/tomasmark79/powersaver"
 
@@ -15,6 +15,7 @@ update_script() {
     if [ -d ".git" ]; then
         if git pull; then
             echo "Repository successfully updated."
+        fi
     else
         echo "Git repository is missing. Cloning from GitHub..."
         git clone "$REPO_URL" "$SCRIPT_DIR"
@@ -25,7 +26,6 @@ update_script() {
 if [ "$1" == "--update" ]; then
     update_script
 fi
-
 
 function convert_to_mhz {
     freq=$1
@@ -197,8 +197,6 @@ function check_and_set_governor {
 # -------------------------------------------------------------------------------------
 # Main entry point
 # -------------------------------------------------------------------------------------
-
-
 
 # Check if cpupower package is installed
 if ! dpkg -l | grep cpupower >/dev/null; then
