@@ -24,6 +24,13 @@ if [ "$1" = "--update" ]; then
     else
         echo "Git repository not found. Cloning new one..."
     fi
+    
+    # Check if .git directory exists
+    if [ ! -d .git ]; then
+        echo ".git directory does not exist."
+    else
+        echo ".git directory exists."
+    fi
 
     # Check the status of the last command
     if [ $? -ne 0 ]; then
@@ -34,11 +41,10 @@ if [ "$1" = "--update" ]; then
 
     if [ ! -d .git ] || [ $? -ne 0 ]; then
         timestamp=$(date +"%Y%m%d_%H%M%S")
-        new_dir="$(dirname "$SCRIPT_DIR")/"$timestamp"_old_powersaver"
+        new_dir="$(dirname "$SCRIPT_DIR")/$timestamp"
         mkdir -p "$new_dir"
         mv "$SCRIPT_DIR" "$new_dir"
         git clone "$REPO_URL" "$SCRIPT_DIR"
-
     fi
 
     echo "Update completed."
