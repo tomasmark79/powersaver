@@ -16,7 +16,8 @@ function create_repository {
     if [ "$(ls -A .)" ]; then
         echo "Directory is not empty. Creating backup and cloning repository..."
         mkdir "$backup_dir"
-        mv * "$backup_dir"
+        # mv * "$backup_dir" # exclude backup directory from move sure
+        find . -maxdepth 1 -mindepth 1 ! -name "$backup_dir" -exec mv {} "$backup_dir" \;
         git clone "$url" .
         mv "$backup_dir"/* .
         rmdir "$backup_dir"
