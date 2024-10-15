@@ -11,24 +11,29 @@ num_cores=$(nproc --all)
 # Functions pattern
 # -------------------------------------------------------------------------------------
 
+
 update_script() {
     TIMESTAMP=$(date +"%Y%m%d%H%M%S")
     BACKUP_DIR="${SCRIPT_DIR}_backup_$TIMESTAMP"
 
-    if [ -d "$SCRIPT_DIR/.git" ]; then
-        cd "$SCRIPT_DIR"
-        if git pull; then
-            echo "Repository successfully updated."
+    if [ -d "$SCRIPT_DIR" ] && [ "$(ls -A $SCRIPT_DIR)" ]; then
+        if [ -d "$SCRIPT_DIR/.git" ]; then
+            cd "$SCRIPT_DIR"
+            if git pull; then
+                echo "Repository successfully updated."
+                return
+            else
+                echo "Repository is broken. Creating a backup and cloning again..."
+            fi
         else
-            echo "Repository is broken. Creating a backup and cloning again..."
-            cd ..
-            mv "$SCRIPT_DIR" "$BACKUP_DIR"
-            git clone "$REPO_URL" "$SCRIPT_DIR"
+            echo "Directory exists and is not empty. Creating a backup and cloning again..."
         fi
-    else
-        echo "Git repository is missing. Cloning from GitHub..."
-        git clone "$REPO_URL" "$SCRIPT_DIR"
+        cd ..
+        mv "$SCRIPT_DIR" "$BACKUP_DIR"
     fi
+
+    echo "Cloning repository from GitHub..."
+    git clone "$REPO_URL" "$SCRIPT_DIR"
 }
 
 # Check if the --update parameter was provided
