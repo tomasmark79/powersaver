@@ -12,6 +12,8 @@ num_cores=$(nproc --all)
 # -------------------------------------------------------------------------------------
 
 if [ "$1" = "--update" ]; then
+    # Získání aktuálního časového razítka ve formátu YYYYMMDD_HHMMSS
+    timestamp=$(date +"%Y%m%d_%H%M%S")
     if [ -d .git ]; then
         echo "Aktualizuji existující repozitář..."
         if git pull origin main; then
@@ -19,7 +21,14 @@ if [ "$1" = "--update" ]; then
         else
             echo "Aktualizace selhala. Pokusím se o nové klonování..."
             cd ..
-            rm -rf "$SCRIPT_DIR"
+            
+            # toto je pripadne moc znicujici
+            # rm -rf "$SCRIPT_DIR"
+            # Vytvoření nové složky o úroveň výše s časovým razítkem jako názvem
+            new_dir="$(dirname "$SCRIPT_DIR")/$timestamp"
+            mkdir -p "$new_dir"
+            # Přesunutí původní složky do nové složky
+            mv "$SCRIPT_DIR" "$new_dir"
             git clone "$REPO_URL" "$SCRIPT_DIR"
         fi
     else
