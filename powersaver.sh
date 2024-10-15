@@ -25,14 +25,19 @@ if [ "$1" = "--update" ]; then
         echo "Git repository not found. Cloning new one..."
     fi
 
+    # Check the status of the last command
+    if [ $? -ne 0 ]; then
+        echo "Last command failed with status $?."
+    else
+        echo "Last command succeeded with status $?."
+    fi
+
     if [ ! -d .git ] || [ $? -ne 0 ]; then
-        echo "Git repository not found. Cloning new one..."
         timestamp=$(date +"%Y%m%d_%H%M%S")
         new_dir="$(dirname "$SCRIPT_DIR")/"$timestamp"_old_powersaver"
         mkdir -p "$new_dir"
         mv "$SCRIPT_DIR" "$new_dir"
         git clone "$REPO_URL" "$SCRIPT_DIR"
-        
 
     fi
 
