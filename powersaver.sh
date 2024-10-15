@@ -20,10 +20,10 @@ function create_repository {
         if [ "$(ls -A . 2>/dev/null)" ]; then
             echo "Directory is not empty. Creating backup and cloning repository..."
             mkdir "$backup_dir" || { echo "Failed to create backup directory"; exit 1; }
-            
-            shopt -s dotglob nullglob
-            mv .* * "$backup_dir" 2>/dev/null || { echo "Failed to move files to backup"; exit 1; }
-            shopt -u dotglob nullglob
+
+            shopt -s dotglob extglob
+            mv -- !(backup_*) "$backup_dir" || { echo "Failed to move files to backup"; exit 1; }
+            shopt -u dotglob extglob
 
             git clone "$url" . || { echo "Failed to clone repository"; exit 1; }
             mv "$backup_dir"/* . || { echo "Failed to move files back from backup"; exit 1; }
@@ -37,6 +37,7 @@ function create_repository {
     echo "Script updated from $url, exiting..."
     exit 0
 }
+
 
 function pull_updates {
     # Fetch changes without merging
