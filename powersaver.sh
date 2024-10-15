@@ -11,12 +11,14 @@ num_cores=$(nproc --all)
 # Functions pattern
 # -------------------------------------------------------------------------------------
 
+
 if [ "$1" = "--update" ]; then
-    # Get the current timestamp in the format YYYYMMDD_HHMMSS
     timestamp=$(date +"%Y%m%d_%H%M%S")
     if [ -d .git ]; then
         echo "Updating existing repository..."
-        if git pull origin main; then
+
+        # Always only pull from main branch
+        if git restore --source=HEAD --staged --worktree .; then 
             echo "Update successful."
         else
             echo "Update failed. Attempting to clone anew..."
