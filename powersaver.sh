@@ -51,6 +51,8 @@ function update {
     fi
 
     echo "Update completed."
+
+    
     ls -la
 }
 
