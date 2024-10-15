@@ -4,6 +4,8 @@
 
 ## Features
 
+![image](https://github.com/user-attachments/assets/be425867-655b-4c6d-9447-17bfb89f874a)
+
 <img width="471" alt="image" src="https://github.com/user-attachments/assets/3c6e832c-c825-466a-a4bc-59d3dba35b6d">
 
 - **View CPU Info:** Displays the CPU model, core count, and current frequency limits.
