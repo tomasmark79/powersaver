@@ -2,6 +2,7 @@
 
 # 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_URL="https://github.com/tomasmark79/powersaver"
 
 # Get number of cpu cores
 num_cores=$(nproc --all)
@@ -10,37 +11,20 @@ num_cores=$(nproc --all)
 # Functions pattern
 # -------------------------------------------------------------------------------------
 
-#!/bin/bash
-
-#!/bin/bash
-
-# Funkce pro aktualizaci skriptu
 update_script() {
-    REPO_URL="git@github.com:tomasmark79/powersaver.git"  # URL repozitáře
-    SCRIPT_DIR=$(pwd)
-
-    # Kontrola, zda se jedná o git repozitář
     if [ -d ".git" ]; then
-        echo "Jedná se o git repozitář. Pokouším se o git pull..."
         if git pull; then
-            echo "Repozitář byl úspěšně aktualizován."
-        else
-            echo "Chyba při provádění git pull. Zkouším znovu naklonovat repozitář."
-            rm -rf .git  # Smažeme poškozený git repozitář
-            git clone "$REPO_URL" "$SCRIPT_DIR"
-        fi
+            echo "Repository successfully updated."
     else
-        echo "Chybí git repozitář. Klonuji z GitHubu..."
+        echo "Git repository is missing. Cloning from GitHub..."
         git clone "$REPO_URL" "$SCRIPT_DIR"
     fi
 }
 
-# Kontrola, zda byl zadán parametr --update
+# Check if the --update parameter was provided
 if [ "$1" == "--update" ]; then
     update_script
 fi
-
-
 
 
 function convert_to_mhz {
