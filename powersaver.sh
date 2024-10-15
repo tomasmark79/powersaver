@@ -15,10 +15,6 @@ function update {
 
     git_pull_status=0
 
-    # Debug: Zobrazení aktuálního adresáře
-    echo "Aktuální adresář: $PWD"
-    echo "Script directory: $SCRIPT_DIR"
-
     # Check if the script is in a git repository
     if [ -d .git ]; then
         echo "Updating existing repository..."
@@ -38,23 +34,19 @@ function update {
 
     # broken structure of git repository will cause to clone new one
     if [ ! -d .git ] || [ $git_pull_status -ne 0 ]; then
-        
-        original_dir="$PWD"
-
         # backup store to timestamp directory about one level up
         cd ..
-        echo "Po přechodu o úroveň výš: $PWD"
+
         timestamp=$(date +"%Y%m%d_%H%M%S")
         new_dir="$(dirname "$SCRIPT_DIR")/$timestamp"
         mkdir -p "$new_dir"
         mv "$SCRIPT_DIR" "$new_dir"
         git clone "$REPO_URL" "$SCRIPT_DIR"
         
+        cd "$SCRIPT_DIR"
     fi
     
     echo "Update completed."
-
-    cd "$original_dir"    
     ls -la
 }
 
