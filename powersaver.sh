@@ -11,15 +11,15 @@ num_cores=$(nproc --all)
 # Functions pattern
 # -------------------------------------------------------------------------------------
 
-if [ "$1" = "--update" ]; then
-    
+function update {
+
     git_pull_status=0
-    
+    # Check if the script is in a git repository
     if [ -d .git ]; then
         echo "Updating existing repository..."
         # Restore deleted files
         git restore --source=HEAD --staged --worktree .
-        
+
         if git pull origin main; then
             echo "Update successful."
         else
@@ -30,7 +30,8 @@ if [ "$1" = "--update" ]; then
         echo "Git repository not found. Cloning new one..."
         git_pull_status=1
     fi
-    
+
+    # broken structure of git repository will cause to clone new one
     if [ ! -d .git ] || [ $git_pull_status -ne 0 ]; then
         cd ..
         timestamp=$(date +"%Y%m%d_%H%M%S")
@@ -40,46 +41,15 @@ if [ "$1" = "--update" ]; then
         git clone "$REPO_URL" "$SCRIPT_DIR"
         cd ..
         cd ..
-        
+
     fi
 
     echo "Update completed."
     exit 0
-fi
 
-# if [ "$1" = "--update" ]; then
-#     # Get the current timestamp in the format YYYYMMDD_HHMMSS
+}
 
-#     if [ -d .git ]; then
-#         echo "Updating existing repository..."
-#         # Restore deleted files
-#         git restore --source=HEAD --staged --worktree .
-#         if git pull origin main; then
-#             echo "Update successful."
-#         else
-#             echo "Update failed. Attempting to clone anew..."
-#             cd ..
 
-#             timestamp=$(date +"%Y%m%d_%H%M%S")
-#             new_dir="$(dirname "$SCRIPT_DIR")/"$timestamp"_old_powersaver"
-#             mkdir -p "$new_dir"
-#             mv "$SCRIPT_DIR" "$new_dir"
-#             git clone "$REPO_URL" "$SCRIPT_DIR"
-#         fi
-#     else
-#         echo "Git repository not found. Cloning new one..."
-#         cd ..
-
-#         timestamp=$(date +"%Y%m%d_%H%M%S")
-#         new_dir="$(dirname "$SCRIPT_DIR")/"$timestamp"_old_powersaver"
-#         mkdir -p "$new_dir"
-#         mv "$SCRIPT_DIR" "$new_dir"
-#         git clone "$REPO_URL" "$SCRIPT_DIR"
-#     fi
-
-#     echo "Update completed."
-#     exit 0
-# fi
 
 function convert_to_mhz {
     freq=$1
@@ -251,6 +221,11 @@ function check_and_set_governor {
 # -------------------------------------------------------------------------------------
 # Main entry point
 # -------------------------------------------------------------------------------------
+
+# Check if script is called with --update argument
+if [ "$1" = "--update" ]; then
+    update
+fi
 
 # Check if cpupower package is installed
 if ! dpkg -l | grep cpupower >/dev/null; then
