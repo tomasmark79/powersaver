@@ -11,35 +11,26 @@ num_cores=$(nproc --all)
 # Functions pattern
 # -------------------------------------------------------------------------------------
 
-git_update() {
-    if [ "$1" = "--update" ]; then
-        cd "$SCRIPT_DIR" || exit 1
-
-        if [ -d .git ]; then
-            echo "Aktualizuji existující repozitář..."
-            if git pull origin main; then
-                echo "Aktualizace úspěšná."
-            else
-                echo "Aktualizace selhala. Pokusím se o nové klonování..."
-                cd ..
-                rm -rf "$SCRIPT_DIR"
-                git clone "$REPO_URL" "$SCRIPT_DIR"
-            fi
+if [ "$1" = "--update" ]; then
+    if [ -d .git ]; then
+        echo "Aktualizuji existující repozitář..."
+        if git pull origin main; then
+            echo "Aktualizace úspěšná."
         else
-            echo "Git repozitář nenalezen. Klonuji nový..."
+            echo "Aktualizace selhala. Pokusím se o nové klonování..."
             cd ..
             rm -rf "$SCRIPT_DIR"
             git clone "$REPO_URL" "$SCRIPT_DIR"
         fi
-
-        echo "Aktualizace dokončena."
-        exit 0
+    else
+        echo "Git repozitář nenalezen. Klonuji nový..."
+        cd ..
+        rm -rf "$SCRIPT_DIR"
+        git clone "$REPO_URL" "$SCRIPT_DIR"
     fi
-}
 
-# Check if the --update parameter was provided
-if [ "$1" == "--update" ]; then
-    git_update
+    echo "Aktualizace dokončena."
+    exit 0
 fi
 
 function convert_to_mhz {
