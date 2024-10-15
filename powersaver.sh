@@ -39,7 +39,7 @@ git_update() {
 
 # Check if the --update parameter was provided
 if [ "$1" == "--update" ]; then
-    update_script
+    git_update
 fi
 
 function convert_to_mhz {
