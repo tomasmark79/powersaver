@@ -14,6 +14,11 @@ num_cores=$(nproc --all)
 function update {
 
     git_pull_status=0
+
+    # Debug: Zobrazení aktuálního adresáře
+    echo "Aktuální adresář: $PWD"
+    echo "Script directory: $SCRIPT_DIR"
+
     # Check if the script is in a git repository
     if [ -d .git ]; then
         echo "Updating existing repository..."
@@ -36,6 +41,7 @@ function update {
         
         # backup store to timestamp directory about one level up
         cd ..
+        echo "Po přechodu o úroveň výš: $PWD"
         timestamp=$(date +"%Y%m%d_%H%M%S")
         new_dir="$(dirname "$SCRIPT_DIR")/$timestamp"
         mkdir -p "$new_dir"
@@ -51,6 +57,7 @@ function update {
 # Check if script is called with --update argument
 if [ "$1" = "--update" ]; then
     update
+    exit 0
 fi
 
 function convert_to_mhz {
