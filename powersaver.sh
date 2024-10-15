@@ -40,7 +40,7 @@ if [ "$1" = "--update" ]; then
         git clone "$REPO_URL" "$SCRIPT_DIR"
         cd ..
         cd ..
-        cd powersaver
+        
     fi
 
     echo "Update completed."
