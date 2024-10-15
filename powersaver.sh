@@ -13,37 +13,44 @@ function create_repository {
     local backup_dir="backup_$(date +%s)"
     echo "Downloading script from $url..."
 
-    if [ "$(ls -A .)" ]; then
-        echo "Directory is not empty. Creating backup and cloning repository..."
-        mkdir "$backup_dir"
-        # mv * "$backup_dir" # exclude backup directory from move sure
-        find . -maxdepth 1 -mindepth 1 ! -name "$backup_dir" -exec mv {} "$backup_dir" \;
-        git clone "$url" .
-        mv "$backup_dir"/* .
-        rmdir "$backup_dir"
+    if [ -d .git ]; then
+        echo "Already a git repository. Pulling updates..."
+        git pull origin main || { echo "Failed to pull updates"; exit 1; }
     else
-        echo "Not a git repository. Cloning repository..."
-        git clone "$url" .
+        if [ "$(ls -A . 2>/dev/null)" ]; then
+            echo "Directory is not empty. Creating backup and cloning repository..."
+            mkdir "$backup_dir" || { echo "Failed to create backup directory"; exit 1; }
+            
+            shopt -s dotglob nullglob
+            mv .* * "$backup_dir" 2>/dev/null || { echo "Failed to move files to backup"; exit 1; }
+            shopt -u dotglob nullglob
+
+            git clone "$url" . || { echo "Failed to clone repository"; exit 1; }
+            mv "$backup_dir"/* . || { echo "Failed to move files back from backup"; exit 1; }
+        else
+            echo "Not a git repository. Cloning repository..."
+            git clone "$url" . || { echo "Failed to clone repository"; exit 1; }
+        fi
     fi
 
-    chmod +x "$script_name"
+    chmod +x "$script_name" || { echo "Failed to make script executable"; exit 1; }
     echo "Script updated from $url, exiting..."
-    exit 1
+    exit 0
 }
 
 function pull_updates {
     # Fetch changes without merging
-    git fetch origin main
+    git fetch origin main || { echo "Failed to fetch changes"; exit 1; }
 
     # Check if there are updates to be pulled
     UPSTREAM=${1:-'@{u}'}
-    LOCAL=$(git rev-parse @)
-    REMOTE=$(git rev-parse "$UPSTREAM")
+    LOCAL=$(git rev-parse @) || { echo "Failed to get local revision"; exit 1; }
+    REMOTE=$(git rev-parse "$UPSTREAM") || { echo "Failed to get remote revision"; exit 1; }
 
     if [ "$LOCAL" != "$REMOTE" ]; then
-        echo "git pull: content updated, exiting ..."
-        git pull --ff-only
-        exit 1
+        echo "git pull: content updated, exiting..."
+        git pull --ff-only || { echo "Failed to pull changes"; exit 1; }
+        exit 0
     else
         echo "Already up to date."
     fi
