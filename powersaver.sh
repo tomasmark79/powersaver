@@ -12,17 +12,16 @@ num_cores=$(nproc --all)
 # -------------------------------------------------------------------------------------
 
 if [ "$1" = "--update" ]; then
-    # Získání aktuálního časového razítka ve formátu YYYYMMDD_HHMMSS
+    # Get the current timestamp in the format YYYYMMDD_HHMMSS
     timestamp=$(date +"%Y%m%d_%H%M%S")
     if [ -d .git ]; then
-        echo "Aktualizuji existující repozitář..."
+        echo "Updating existing repository..."
         if git pull origin main; then
-            echo "Aktualizace úspěšná."
+            echo "Update successful."
         else
-            echo "Aktualizace selhala. Pokusím se o nové klonování..."
+            echo "Update failed. Attempting to clone anew..."
             cd ..
 
-            # toto je moc drasticke rm -rf "$SCRIPT_DIR"
             new_dir="$(dirname "$SCRIPT_DIR")/$timestamp"
             mkdir -p "$new_dir"
             mv "$SCRIPT_DIR" "$new_dir"
@@ -30,10 +29,10 @@ if [ "$1" = "--update" ]; then
             git clone "$REPO_URL" "$SCRIPT_DIR"
         fi
     else
-        echo "Git repozitář nenalezen. Klonuji nový..."
+        echo "Git repository not found. Cloning new one..."
         cd ..
 
-        # toto je moc drasticke rm -rf "$SCRIPT_DIR"
+        # this is too drastic rm -rf "$SCRIPT_DIR"
         new_dir="$(dirname "$SCRIPT_DIR")/$timestamp"
         mkdir -p "$new_dir"
         mv "$SCRIPT_DIR" "$new_dir"
@@ -41,7 +40,7 @@ if [ "$1" = "--update" ]; then
         git clone "$REPO_URL" "$SCRIPT_DIR"
     fi
 
-    echo "Aktualizace dokončena."
+    echo "Update completed."
     exit 0
 fi
 
