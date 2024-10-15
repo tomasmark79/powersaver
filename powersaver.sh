@@ -46,7 +46,7 @@ function clone_self {
 function update_script {
     if [ -d .git ]; then
         echo "Checking for script updates via git..."
-        check_self_update
+        check_self
     else
         download_script
     fi
@@ -55,9 +55,6 @@ function update_script {
 # Check if the first argument is 'update'
 if [ "$1" == "--update" ]; then
     update_script
-else
-    echo "No update requested."
-    # Add your main script logic here
 fi
 
 function convert_to_mhz {
