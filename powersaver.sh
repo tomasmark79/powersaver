@@ -13,11 +13,6 @@ num_cores=$(nproc --all)
 
 function update {
 
-    #original_dir=$SCRIPT_DIR
-    original_dir=$(pwd)
-    
-    cd "$SCRIPT_DIR" || exit 1
-
     git_pull_status=0
     # Check if the script is in a git repository
     if [ -d .git ]; then
@@ -46,11 +41,12 @@ function update {
         mkdir -p "$new_dir"
         mv "$SCRIPT_DIR" "$new_dir"
         git clone "$REPO_URL" "$SCRIPT_DIR"
+        cd .
     fi
 
     echo "Update completed."
-
-    cd "$original_dir" || exit 1
+    cd ..
+    cd "$SCRIPT_DIR" && ls -la
     exit 0
 }
 
