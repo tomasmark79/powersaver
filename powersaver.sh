@@ -7,7 +7,35 @@ num_cores=$(nproc --all)
 # Functions pattern
 # -------------------------------------------------------------------------------------
 
-function check_self_update {
+function create_repository {
+    local url="https://github.com/tomasmark79/powersaver.git"
+    local script_name=$(basename "$0")
+    local backup_dir="backup_$(date +%s)"
+    echo "Downloading script from $url..."
+
+    if [ -d .git ]; then
+        echo "Already a git repository. Pulling updates..."
+        git pull origin main
+    else
+        if [ "$(ls -A .)" ]; then
+            echo "Directory is not empty. Creating backup and cloning repository..."
+            mkdir "$backup_dir"
+            mv * "$backup_dir"
+            git clone "$url" .
+            mv "$backup_dir"/* .
+            rmdir "$backup_dir"
+        else
+            echo "Not a git repository. Cloning repository..."
+            git clone "$url" .
+        fi
+    fi
+
+    chmod +x "$script_name"
+    echo "Script updated from $url, exiting..."
+    exit 1
+}
+
+function pull_updates {
     # Fetch changes without merging
     git fetch origin main
 
@@ -25,36 +53,14 @@ function check_self_update {
     fi
 }
 
-function create_repository {
-    local url="https://github.com/tomasmark79/powersaver.git"
-    local script_name=$(basename "$0")
-    echo "Downloading script from $url..."
-
-    if [ -d .git ]; then
-        echo "Already a git repository. Pulling updates..."
-        git pull origin main
-    else
-        echo "Not a git repository. Cloning repository..."
-        git clone "$url" .
-    fi
-
-    chmod +x "$script_name"
-    echo "Script updated from $url, exiting..."
-    exit 1
-}
-
-function update_script {
+# Check if the first argument is 'update'
+if [ "$1" == "--update" ]; then
     if [ -d .git ]; then
         echo "Checking for script updates via git..."
-        check_self_update
+        pull_updates
     else
         create_repository
     fi
-}
-
-# Check if the first argument is 'update'
-if [ "$1" == "--update" ]; then
-    update_script
 fi
 
 function convert_to_mhz {
