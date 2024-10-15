@@ -21,20 +21,23 @@ if [ "$1" = "--update" ]; then
         else
             echo "Aktualizace selhala. Pokusím se o nové klonování..."
             cd ..
-            
-            # toto je pripadne moc znicujici
-            # rm -rf "$SCRIPT_DIR"
-            # Vytvoření nové složky o úroveň výše s časovým razítkem jako názvem
+
+            # toto je moc drasticke rm -rf "$SCRIPT_DIR"
             new_dir="$(dirname "$SCRIPT_DIR")/$timestamp"
             mkdir -p "$new_dir"
-            # Přesunutí původní složky do nové složky
             mv "$SCRIPT_DIR" "$new_dir"
+
             git clone "$REPO_URL" "$SCRIPT_DIR"
         fi
     else
         echo "Git repozitář nenalezen. Klonuji nový..."
         cd ..
-        rm -rf "$SCRIPT_DIR"
+
+        # toto je moc drasticke rm -rf "$SCRIPT_DIR"
+        new_dir="$(dirname "$SCRIPT_DIR")/$timestamp"
+        mkdir -p "$new_dir"
+        mv "$SCRIPT_DIR" "$new_dir"
+
         git clone "$REPO_URL" "$SCRIPT_DIR"
     fi
 
