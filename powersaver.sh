@@ -277,7 +277,7 @@ if [[ "$1" == "--user-profile" || "$1" == "-up" ]]; then
 
             # relax
             elif [[ "$2" == "relax" ]]; then
-                future_argument="--cpu-profile custom 3.8 Ghz --governor powersave"
+                future_argument="--cpu-profile custom 3.0 Ghz --governor powersave"
 
             # out of office
             elif [[ "$2" == "ooo" ]]; then
