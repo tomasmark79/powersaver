@@ -47,6 +47,21 @@ function run_cpupower {
     fi
 }
 
+function run_cpupower_debug {
+    output=$(sudo cpupower "$@" 2>&1)
+    status=$?
+    # Log the complete output for debugging
+    echo "Debug: cpupower $* output:" >> /tmp/powersaver.log
+    echo "$output" >> /tmp/powersaver.log
+    
+    if [ $status -ne 0 ]; then
+        prRed "Error calling cpupower with parameters: $*"
+        prRed "Output: $output"
+        exit 1
+    fi
+    echo "$output"
+}
+
 function run_cpupower_no_output {
     if ! sudo cpupower "$@" >/dev/null; then
         prRed "Error calling cpupower with parameters: $*"
@@ -78,6 +93,52 @@ function get_cpu_limits {
     done
     prGreen "Factory limits\t: Total Cores ${num_cores} - min: ${min_freqs[0]} ${min_freq_units[0]} - max: ${max_freqs[0]} ${max_freq_units[0]}"
 }
+
+# function get_cpu_limits {
+#     local hwLimitsPattern="hardware limits:"
+    
+#     # Debug output
+#     prYellow "Debug: Attempting to get CPU limits..."
+#     echo "Debug: Current user: $USER" >> /tmp/powersaver.log
+#     echo "Debug: SUDO_USER: $SUDO_USER" >> /tmp/powersaver.log
+    
+#     for ((i = 0; i < num_cores; i++)); do
+#         # Get and log raw output
+#         cpu_info=$(run_cpupower -c $i frequency-info)
+#         echo "Debug: Raw CPU info for core $i:" >> /tmp/powersaver.log
+#         echo "$cpu_info" >> /tmp/powersaver.log
+        
+#         # Check if pattern exists
+#         if ! echo "$cpu_info" | grep -q "$hwLimitsPattern"; then
+#             prRed "Error: Could not find hardware limits pattern in cpupower output"
+#             echo "Debug: Pattern '$hwLimitsPattern' not found in output" >> /tmp/powersaver.log
+#             continue
+#         fi
+        
+#         # Extract values with validation
+#         min_freqs[i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $3}')
+#         min_freq_units[i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $4}')
+#         max_freqs[i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $6}')
+#         max_freq_units[i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $7}')
+        
+#         # Validate extracted values
+#         if [ -z "${min_freqs[i]}" ] || [ -z "${min_freq_units[i]}" ] || 
+#            [ -z "${max_freqs[i]}" ] || [ -z "${max_freq_units[i]}" ]; then
+#             prRed "Warning: Empty values detected for core $i"
+#             echo "Debug: min_freq=${min_freqs[i]}" >> /tmp/powersaver.log
+#             echo "Debug: min_unit=${min_freq_units[i]}" >> /tmp/powersaver.log
+#             echo "Debug: max_freq=${max_freqs[i]}" >> /tmp/powersaver.log
+#             echo "Debug: max_unit=${max_freq_units[i]}" >> /tmp/powersaver.log
+#         fi
+#     done
+
+#     # Only print if we have valid values
+#     if [ -n "${min_freqs[0]}" ] && [ -n "${max_freqs[0]}" ]; then
+#         prGreen "Factory limits\t: Total Cores ${num_cores} - min: ${min_freqs[0]} ${min_freq_units[0]} - max: ${max_freqs[0]} ${max_freq_units[0]}"
+#     else
+#         prRed "Error: Could not determine CPU frequency limits"
+#     fi
+# }
 
 function get_cpu_policy {
     local policyPattern="policy"
@@ -116,11 +177,11 @@ function setMinMaxFreq {
 
 function setCustomFreq {
       if ! [[ "$1" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-        prRed "Neplatná frekvence: $1"
+        prRed "Invalid frequency: $1"
         exit 1
     fi
     if ! [[ "$2" =~ ^(MHz|GHz)$ ]]; then
-        prRed "Neplatná jednotka: $2"
+        prRed "Invalid frequency: $2"
         exit 1
     fi
     for ((i = 0; i < num_cores; i++)); do

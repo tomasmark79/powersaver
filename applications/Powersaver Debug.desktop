@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=PowerSaver Fire
+Exec=sh -c 'export LANG=C; export LC_ALL=C; /home/tomas/dev/bash/powersaver/powersaver.sh -p fire ; bash'
+Icon=/home/tomas/dev/bash/powersaver/cpu.png
+Type=Application
+Terminal=true
