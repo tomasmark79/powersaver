@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=PowerSaver VSCode
-Exec=code /home/tomas/dev/bash/powersaver/
-Icon=/home/tomas/dev/bash/powersaver/cpu.png
-Type=Application
-Terminal=false
-
-

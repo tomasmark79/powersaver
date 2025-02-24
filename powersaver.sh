@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# fast log monitoring
+# lnav /tmp/powersaver.log or tail -f /tmp/powersaver.log
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 num_cores=$(nproc --all)
@@ -39,14 +42,14 @@ prWhite "[$(date +'%Y-%m-%d %H:%M:%S')] PowerSaver Started $*" >> /tmp/powersave
 
 function run_cpupower {
     if ! sudo cpupower "$@"; then
-        prRed "Chyba při volání cpupower s parametry: $*"
+        prRed "Error calling cpupower with parameters: $*"
         exit 1
     fi
 }
 
 function run_cpupower_no_output {
     if ! sudo cpupower "$@" >/dev/null; then
-        prRed "Chyba při volání cpupower s parametry: $*"
+        prRed "Error calling cpupower with parameters: $*"
         exit 1
     fi
 }
@@ -101,6 +104,10 @@ function setMinMaxFreq {
     for ((i = 0; i < num_cores; i++)); do
         min_freqs[i]=$(convert_to_mhz "${min_freqs[$i]}" "${min_freq_units[$i]}")
         max_freqs[i]=$(convert_to_mhz "${max_freqs[$i]}" "${max_freq_units[$i]}")
+        if [ -z "${min_freqs[$i]}" ] || [ -z "${max_freqs[$i]}" ]; then
+            prRed "Frequency is not correctly set for core $i"
+            exit 1
+        fi
         cmd=("-c" "$i" "frequency-set" "-d" "${min_freqs[$i]}""Mhz" "-u" "${max_freqs[$i]}""Mhz")
         run_cpupower_no_output "${cmd[@]}"
     done
@@ -119,7 +126,11 @@ function setCustomFreq {
     for ((i = 0; i < num_cores; i++)); do
         min_freqs[i]=$(convert_to_mhz "${min_freqs[$i]}" "${min_freq_units[$i]}")
         max_freqs[i]=$(convert_to_mhz "$1" "$2")
-    cmd=("-c" "$i" "frequency-set" "-d" "${min_freqs[$i]}""Mhz" "-u" "${max_freqs[$i]}""Mhz")
+        if [ -z "${min_freqs[$i]}" ] || [ -z "${max_freqs[$i]}" ] || [ "${min_freqs[$i]}" -eq 0 ] || [ "${max_freqs[$i]}" -eq 0 ]; then
+            prRed "Frequency is not correctly set for core $i"
+            exit 1
+        fi
+        cmd=("-c" "$i" "frequency-set" "-d" "${min_freqs[$i]}""Mhz" "-u" "${max_freqs[$i]}""Mhz")
         run_cpupower_no_output "${cmd[@]}"
     done
     #prYellow "Command: run_cpupower ${cmd[*]}"
@@ -179,6 +190,9 @@ function apply_user_profile {
 # -------------------------------------------------------------------------------------
 # Entry point
 # -------------------------------------------------------------------------------------
+
+# print current user running this script
+prGreen "Current user: $USER"
 
 # Check cpupower installation
 if ! dpkg -l | grep cpupower >/dev/null; then

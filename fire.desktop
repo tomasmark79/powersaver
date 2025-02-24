@@ -1,8 +1,6 @@
 [Desktop Entry]
 Name=PowerSaver Fire
-Exec=/home/tomas/dev/bash/powersaver/powersaver.sh -up fire
+Exec='/home/tomas/dev/bash/powersaver/powersaver.sh -p fire'
 Icon=/home/tomas/dev/bash/powersaver/cpu.png
 Type=Application
 Terminal=false
-
-

@@ -1,7 +1,0 @@
-[Desktop Entry]
-Name=PowerSaver Time Id Gold
-Exec=/home/tomas/dev/bash/powersaver/powersaver.sh -up timeisgold
-Icon=/home/tomas/dev/bash/powersaver/cpu.png
-Type=Application
-Terminal=false
-
