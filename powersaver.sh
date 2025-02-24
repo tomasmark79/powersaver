@@ -1,232 +1,189 @@
 #!/bin/bash
 
-#
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_URL="https://github.com/tomasmark79/powersaver"
 
-# Get number of cpu cores
 num_cores=$(nproc --all)
 
-# -------------------------------------------------------------------------------------
-# Functions pattern
-# -------------------------------------------------------------------------------------
-
-function update {
-
-    git_pull_status=0
-
-    # Check if the script is in a git repository
-    if [ -d .git ]; then
-        echo "Updating existing repository..."
-        # Restore deleted files
-        git restore --source=HEAD --staged --worktree .
-
-        if git pull origin main; then
-            echo "Update successful."
-        else
-            echo "Update failed. Attempting to clone a new..."
-            git_pull_status=1
-        fi
-    else
-        echo "Git repository not found. Cloning new one..."
-        git_pull_status=1
-    fi
-
-    # broken structure of git repository will cause to clone new one
-    if [ ! -d .git ] || [ $git_pull_status -ne 0 ]; then
-        # backup store to timestamp directory about one level up
-        cd ..
-
-        timestamp=$(date +"%Y%m%d_%H%M%S")
-        new_dir="$(dirname "$SCRIPT_DIR")/$timestamp"
-        mkdir -p "$new_dir"
-        mv "$SCRIPT_DIR" "$new_dir"
-        git clone "$REPO_URL" "$SCRIPT_DIR"
-        
-        cd "$SCRIPT_DIR"
-    fi
-    
-    echo "Update completed."
-    ls -la
+function log_and_print {
+    local color_code=$1
+    shift
+    echo -e "\e[${color_code}m$*\e[0m"
+    echo -e "\e[${color_code}m$*\e[0m" >> /tmp/powersaver.log
 }
 
-# Check if script is called with --update argument
-if [ "$1" = "--update" ]; then
-    update
-    exit 0
-fi
+function prWhite {
+    log_and_print 97 "$@"
+}
+
+function prGreen {
+    log_and_print 32 "$@"
+}
+
+function prRed {
+    log_and_print 31 "$@"
+}
+
+function prBlue {
+    log_and_print 34 "$@"
+}
+
+function prYellow {
+    log_and_print 33 "$@"
+}
+
+function prCyan {
+    log_and_print 36 "$@"
+}
+
+prWhite "[$(date +'%Y-%m-%d %H:%M:%S')] PowerSaver Started $*" >> /tmp/powersaver.log
+
+function run_cpupower {
+    if ! sudo cpupower "$@"; then
+        prRed "Chyba při volání cpupower s parametry: $*"
+        exit 1
+    fi
+}
+
+function run_cpupower_no_output {
+    if ! sudo cpupower "$@" >/dev/null; then
+        prRed "Chyba při volání cpupower s parametry: $*"
+        exit 1
+    fi
+}
 
 function convert_to_mhz {
     freq=$1
     unit=$2
     if [ "$unit" == "GHz" ]; then
-        # Tento prevod prevadi na MHz bez desetinnych hodnot
-        # freq=$(echo "$freq" | awk -F. '{print $1}')
-        # freq=$(( freq * 1000 ))
-        # Převod GHz na MHz s desetinnými hodnotami
         freq=$(echo "$freq * 1000" | bc -l)
     fi
-    # Zaokrouhlení na celé číslo (pokud potřebujete desetinná místa, upravte printf)
     LC_NUMERIC=C printf "%.0f\n" "$freq"
-    # echo $freq
 }
 
 function get_cpu_info {
-    echo
-    echo "Getting cpu info ..."
-    model_name=$(cat /proc/cpuinfo | grep 'model name' | uniq | awk -F ': ' '{print $2}')
-    echo -e "$model_name" w "\e[31m$num_cores\e[0m cores"
+    prRed "Detected CPU\t: $(awk -F ': ' '/model name/ {print $2; exit}' /proc/cpuinfo)"
 }
 
 function get_cpu_limits {
-    echo
-    echo "Getting factory cpu limits ..."
-    hwLimitsPattern="hardware limits:"
-    for ((i = 0; i < $num_cores; i++)); do
-        cpu_info=$(sudo cpupower -c $i frequency-info)
-        min_freqs[$i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $3}')
-        min_freq_units[$i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $4}')
-        max_freqs[$i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $6}')
-        max_freq_units[$i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $7}')
-        echo -e "\e[32mCore $i - min: ${min_freqs[$i]} ${min_freq_units[$i]} - max: ${max_freqs[$i]} ${max_freq_units[$i]}\e[0m"
+    local hwLimitsPattern="hardware limits:"
+    for ((i = 0; i < num_cores; i++)); do
+        cpu_info=$(run_cpupower -c $i frequency-info)
+        min_freqs[i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $3}')
+        min_freq_units[i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $4}')
+        max_freqs[i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $6}')
+        max_freq_units[i]=$(echo "$cpu_info" | grep "$hwLimitsPattern" | awk '{print $7}')
     done
-    echo
+    prGreen "Factory limits\t: Total Cores ${num_cores} - min: ${min_freqs[0]} ${min_freq_units[0]} - max: ${max_freqs[0]} ${max_freq_units[0]}"
 }
 
 function get_cpu_policy {
-    policyPattern="policy"
-    echo "Getting current cpu policy ..."
-    for ((i = 0; i < $num_cores; i++)); do
-        cpu_info_policy=$(sudo cpupower -c $i frequency-info)
-        min_freqs_policy[$i]=$(echo "$cpu_info_policy" | grep "$policyPattern" | awk '{print $7}')
-        min_freq_units_policy[$i]=$(echo "$cpu_info_policy" | grep "$policyPattern" | awk '{print $8}')
-        max_freqs_policy[$i]=$(echo "$cpu_info_policy" | grep "$policyPattern" | awk '{print $10}')
-        max_freq_units_policy[$i]=$(echo "$cpu_info_policy" | grep "$policyPattern" | awk '{print $11}')
-        echo -e "\e[34mCore $i - min: ${min_freqs_policy[$i]} ${min_freq_units_policy[$i]} - max: ${max_freqs_policy[$i]} ${max_freq_units_policy[$i]}\e[0m"
+    local policyPattern="policy"
+    for ((i = 0; i < num_cores; i++)); do
+        cpu_info_policy=$(run_cpupower -c $i frequency-info)
+        min_freqs_policy[i]=$(echo "$cpu_info_policy" | grep "$policyPattern" | awk '{print $7}')
+        min_freq_units_policy[i]=$(echo "$cpu_info_policy" | grep "$policyPattern" | awk '{print $8}')
+        max_freqs_policy[i]=$(echo "$cpu_info_policy" | grep "$policyPattern" | awk '{print $10}')
+        max_freq_units_policy[i]=$(echo "$cpu_info_policy" | grep "$policyPattern" | awk '{print $11}')
     done
+    prBlue "Current limits\t: Total Cores ${num_cores} - min: ${min_freqs_policy[0]} ${min_freq_units_policy[0]} - max: ${max_freqs_policy[0]} ${max_freq_units_policy[0]} Governor: $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)"
 }
 
 function print_notify {
     icon=$SCRIPT_DIR/cpu.png
     if [ -z "$SUDO_USER" ]; then
-        notify-send -u low -i $icon "$1" "$2"
+        notify-send -u low -i "$icon" "$1" "$2"
     else
-        sudo -u $SUDO_USER DISPLAY=:0 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u $SUDO_USER)/bus notify-send -u low -i $icon "$1" "$2"
+        sudo -u "$SUDO_USER" DISPLAY=:0 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/"$(id -u "$SUDO_USER")"/bus notify-send -u low -i "$icon" "$1" "$2"
     fi
 }
 
-function check_and_set_max_limits {
-    if [[ "$1" == "max" ]]; then
-        echo "Setting maximal cpu limits ..."
-        for ((i = 0; i < $num_cores; i++)); do
-            echo -e -n "\e[33mForce to set core $i - min: ${min_freqs[$i]}${min_freq_units[$i]} - max: ${max_freqs[$i]}${max_freq_units[$i]}\e[0m "
-            sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u ${max_freqs[$i]}${max_freq_units[$i]}
-        done
-        echo
-        notify_message="Maximum core limits successfully set.\n"
-    fi
-}
-
-function check_and_set_minusgiga_limits {
-    if [[ "$1" == "minusgiga" ]]; then
-        echo "Setting minus one gigahertz cpu limits ..."
-        for ((i = 0; i < $num_cores; i++)); do
-            max_freq=$(convert_to_mhz ${max_freqs[$i]} ${max_freq_units[$i]})
-            max_freq=$((max_freq - 1000))
-            max_freq_units="MHz"
-            echo -e -n "\e[33mAttempt to set core $i - min: ${min_freqs[$i]}${min_freq_units[$i]} - max: ${max_freq}${max_freq_units}\e[0m "
-            sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u ${max_freq}${max_freq_units}
-        done
-        echo
-        notify_message="Minus giga core limits successfully set.\n"
-    fi
-}
-
-function check_and_set_half_limits {
-    if [[ "$1" == "half" ]]; then
-        echo "Setting half of maximum cpu limits ..."
-        for ((i = 0; i < $num_cores; i++)); do
-            max_freq=$(convert_to_mhz ${max_freqs[$i]} ${max_freq_units[$i]})
-            max_freq=$((max_freq / 2))
-            max_freq_units="MHz"
-            echo -e -n "\e[33mAttempt to set core $i - min: ${min_freqs[$i]}${min_freq_units[$i]} - max: ${max_freq}${max_freq_units}\e[0m "
-            sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u ${max_freq}${max_freq_units}
-        done
-        echo
-        notify_message="Half core limits successfully set.\n"
-    fi
-}
-
-function check_and_set_min_limits {
-    if [[ "$1" == "min" ]]; then
-        echo "Setting minimal cpu limits ..."
-        for ((i = 0; i < $num_cores; i++)); do
-            echo -e -n "\e[33mAttempt to set core $i - min: ${min_freqs[$i]}${min_freq_units[$i]} - min: ${min_freqs[$i]}${min_freq_units[$i]}\e[0m "
-            sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u ${min_freqs[$i]}${min_freq_units[$i]}
-        done
-        echo
-        notify_message="Minimal core limits successfully set.\n"
-    fi
-}
-
-function check_and_set_custom_limits {
-    # # params $2 - max frequency, $3 - unit
-    if [[ "$1" == "custom" ]]; then
-        echo "Setting custom cpu limits ..."
-        if [[ -z "$2" || -z "$3" ]]; then
-            echo -e "\e[31mMissing second or third param for max frequency and its unit.\e[0m"
-            echo -e "\e[31mExample: ./powermaster.sh custom_power_saver 1.6 Ghz\e[0m - space char required between freq number and unit!"
-            echo -e "\e[31mExample: ./powermaster.sh custom_power_saver 1600 Mhz\e[0m - space char required between freq number and unit!"
-            echo -e "\e[31mSettings Aborted!\e[0m"
-            return
-        fi
-
-        for ((i = 0; i < $num_cores; i++)); do
-            echo -e -n "\e[33mAttempt to set core $i - min: ${min_freqs[$i]}${min_freq_units[$i]} - max: $2$3\e[0m "
-            sudo cpupower -c $i frequency-set -d ${min_freqs[$i]}${min_freq_units[$i]} -u $2$3
-        done
-        echo
-        notify_message="Cores limits to $notify_message $2 $3 $4 successfully set.\n"
-    fi
-}
-
-function get_governor {
-    echo
-    echo "Getting current cpu governors ..."
-    for ((i = 0; i < $num_cores; i++)); do
-        echo -e "\e[36mCore $i $(cat /sys/devices/system/cpu/cpu$i/cpufreq/scaling_governor)\e[0m"
+function setMinMaxFreq {
+    for ((i = 0; i < num_cores; i++)); do
+        min_freqs[i]=$(convert_to_mhz "${min_freqs[$i]}" "${min_freq_units[$i]}")
+        max_freqs[i]=$(convert_to_mhz "${max_freqs[$i]}" "${max_freq_units[$i]}")
+        cmd=("-c" "$i" "frequency-set" "-d" "${min_freqs[$i]}""Mhz" "-u" "${max_freqs[$i]}""Mhz")
+        run_cpupower_no_output "${cmd[@]}"
     done
-    echo
+    #prYellow "Command: run_cpupower ${cmd[*]}"
 }
 
-function check_and_set_governor {
-    #echo $1 $2 $3 $4 $5 $6
-    for ((i = 0; i < $#; i++)); do
-        if [[ "${!i}" == "--governor" ]]; then
-            next_arg_index=$((i + 1))
-            valid_governons=("powersave" "performance")
-            for index_governor in "${valid_governons[@]}"; do
-                if [[ "${!next_arg_index}" == "$index_governor" ]]; then
-                    echo "Setting governors ..."
-                    for ((i = 0; i < $num_cores; i++)); do
-                        echo -n ${!next_arg_index} | sudo tee /sys/devices/system/cpu/cpu$i/cpufreq/scaling_governor >/dev/null
-                        echo -e "\e[36mCore $i setting governor to ${!next_arg_index}\e[0m"
-                    done
-                    notify_message="$notify_message governor ${!next_arg_index}"
-                fi
-            done
-        fi
+function setCustomFreq {
+      if ! [[ "$1" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+        prRed "Neplatná frekvence: $1"
+        exit 1
+    fi
+    if ! [[ "$2" =~ ^(MHz|GHz)$ ]]; then
+        prRed "Neplatná jednotka: $2"
+        exit 1
+    fi
+    for ((i = 0; i < num_cores; i++)); do
+        min_freqs[i]=$(convert_to_mhz "${min_freqs[$i]}" "${min_freq_units[$i]}")
+        max_freqs[i]=$(convert_to_mhz "$1" "$2")
+    cmd=("-c" "$i" "frequency-set" "-d" "${min_freqs[$i]}""Mhz" "-u" "${max_freqs[$i]}""Mhz")
+        run_cpupower_no_output "${cmd[@]}"
     done
+    #prYellow "Command: run_cpupower ${cmd[*]}"
+}
+
+function setGovernor {
+    for ((i = 0; i < num_cores; i++)); do
+        cmd=("-c" "$i" "frequency-set" "-g" "$1")
+        run_cpupower_no_output "${cmd[@]}"
+    done
+    #prYellow "Command: run_cpupower ${cmd[*]}"
 }
 
 # -------------------------------------------------------------------------------------
-# Main entry point
+# Helper function to set profile from --user-profile
+# -------------------------------------------------------------------------------------
+function apply_user_profile {
+    case "$1" in
+        fire)
+            get_cpu_policy        
+            setMinMaxFreq
+            setGovernor performance
+            get_cpu_policy
+            notify_message="Profile: Fire performance"
+            ;;
+        work)
+            get_cpu_policy
+            setCustomFreq "3.8" "GHz"
+            setGovernor performance
+            get_cpu_policy
+            notify_message="Profile: Work 3.8 GHz performance"
+            ;;
+        relax)
+            get_cpu_policy
+            setCustomFreq "3.0" "GHz"
+            setGovernor powersave
+            get_cpu_policy
+            notify_message="Profile: Relax 3.0 GHz powersave"
+            ;;
+        ooo)
+            get_cpu_policy
+            setCustomFreq "1.8" "GHz"
+            setGovernor powersave
+            get_cpu_policy
+            notify_message="Profile: Out of Office 1.8 GHz powersave"
+            ;;
+        timeisgold)
+            get_cpu_policy
+            setCustomFreq "0.8" "GHz"
+            setGovernor powersave
+            get_cpu_policy
+            notify_message="Profile: Time is Gold 0.8 GHz powersave"
+            ;;
+    esac
+}
+
+# -------------------------------------------------------------------------------------
+# Entry point
 # -------------------------------------------------------------------------------------
 
-# Check if cpupower package is installed
+# Check cpupower installation
 if ! dpkg -l | grep cpupower >/dev/null; then
-    echo -e "\e[31mcpupower package is not installed. Please install it first.\e[0m"
-    echo -e "\e[31mRun: sudo apt install cpupower\e[0m"
+    prRed "cpupower package is not installed. Please install it first."
+    prRed "Run: sudo apt install cpupower"
     exit 1
 fi
 
@@ -239,96 +196,60 @@ declare -a min_freq_units_policy
 declare -a max_freqs_policy
 declare -a max_freq_units_policy
 
-usage="powersaver.sh [options]\n\
---user-profile [ fire | work | relax | ooo | timeisgold ]\n\
---cpu-profile [ max | minusgiga | half | min | custom [max_freq] [Mhz|GHz] ]\n\
---governor [ powersave | performance ]"
+usage="powersaver.sh [options] 
+    --profile  | -p [ fire | work | relax | ooo | timeisgold ]\n\
+    --governor | -g [ powersave   | performance ]"
 
 if [ "$#" -eq 0 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     echo -e "$usage"
-    echo
-    echo -e "\e[31mNo arguments provided.\e[0m"
+    prYellow "Please provide at least one argument."
     get_cpu_info
     get_cpu_limits
     get_cpu_policy
-    get_governor
     exit 1
 fi
 
-future_argument=""
 notify_message=""
 
-# $1 - --user-profile
-# $2 - fire | work | relax | ooo | timeisgold
-if [[ "$1" == "--user-profile" || "$1" == "-up" ]]; then
-    valid_user_profiles=("fire" "work" "relax" "ooo" "timeisgold")
-    for index_user_profile in "${valid_user_profiles[@]}"; do
-        if [[ "$2" == "$index_user_profile" ]]; then
-
-            print_notify "PowerSaver" "Setting $2 profile."
-
-            # fire
-            if [[ "$2" == "fire" ]]; then
-                future_argument="--cpu-profile max --governor performance"
-
-            # work
-            elif [[ "$2" == "work" ]]; then
-                future_argument="--cpu-profile custom 3.8 Ghz --governor performance"
-
-            # relax
-            elif [[ "$2" == "relax" ]]; then
-                future_argument="--cpu-profile custom 3.0 Ghz --governor powersave"
-
-            # out of office
-            elif [[ "$2" == "ooo" ]]; then
-                future_argument="--cpu-profile custom 1.8 Ghz --governor powersave"
-
-            # time is gold
-            elif [[ "$2" == "timeisgold" ]]; then
-                future_argument="--cpu-profile min --governor powersave"
-
+# Argument processing
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --profile|-p)
+            if [ -z "$2" ]; then
+                prRed "Argument --profile | -p requires a value."
+                prRed "Please provide a valid profile: fire, work, relax, ooo, timeisgold"
+                exit 1
             fi
-        fi
-    done
-fi
+            user_profile="$2"
+            shift 2
+            ;;
+        --governor|-g)
+            if [[ "$2" != "powersave" && "$2" != "performance" ]]; then
+                prRed "Invalid governor value. Please provide either 'powersave' or 'performance'."
+                exit 1
+            fi
+            selected_governor="$2"
+            shift 2
+            ;;
+        *)
+            prRed "Unknown parameter: $1"
+            shift
+            ;;
+    esac
+done
 
-# ReRun script with new whole_argument if --user-profile is set
-if [[ "$future_argument" != "" ]]; then
-    bash $0 $future_argument
-    exit 0
-fi
-
-# Second instance of script
-
+# Load CPU information
 get_cpu_info
 get_cpu_limits
 
-# $1 - --cpu-profile
-# $2 - max | minusgiga | half | min | custom
-# $3 - max_freq
-# $4 - Mhz | GHz
-if [[ "$1" == "--cpu-profile" || "$1" == "-cp" ]]; then
-    valid_cpu_profiles=("max" "minusgiga" "half" "min" "custom")
-    for index_cpu_profile in "${valid_cpu_profiles[@]}"; do
-        if [[ "$2" == "$index_cpu_profile" ]]; then
-
-            check_and_set_max_limits $2
-            check_and_set_minusgiga_limits $2
-            check_and_set_half_limits $2
-            check_and_set_min_limits $2
-            check_and_set_custom_limits $2 $3 $4
-            get_cpu_policy
-
-            
-        fi
-    done
+# If user_profile is defined, apply it
+if [[ -n "$user_profile" ]]; then
+  apply_user_profile "$user_profile"
 fi
 
-get_governor
-check_and_set_governor $@
+# And if the governor is defined, set it
+if [[ -n "$selected_governor" ]]; then
+  setGovernor "$selected_governor"
+fi
 
 print_notify "PowerSaver" "$notify_message"
-
-
-
-
