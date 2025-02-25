@@ -6,6 +6,7 @@ PowerSaver is a user script (`powersaver.sh`) that gives the user control to spe
 ![Snímek obrazovky z 2025-02-25 07-31-45](https://github.com/user-attachments/assets/3532cf9a-76f6-4765-a5bb-fe9130e3536f)
 
 ## Requirements
+
 ```bash
 sudo apt install cpupower
 ```
@@ -58,6 +59,30 @@ Set the governor to "powersave":
 
 ```bash
 ./powersaver.sh --governor powersave
+```
+
+## Linux Desktop files
+
+Fire profile:
+
+```
+[Desktop Entry]
+Name=PowerSaver Fire
+Exec=sh -c 'export LANG=C; export LC_ALL=C; /home/tomas/dev/bash/powersaver/powersaver.sh -p fire'
+Icon=/home/tomas/dev/bash/powersaver/cpu.png
+Type=Application
+Terminal=false
+```
+
+Debug profile (keep open terminal)
+
+```
+[Desktop Entry]
+Name=PowerSaver Fire
+Exec=sh -c 'export LANG=C; export LC_ALL=C; /home/tomas/dev/bash/powersaver/powersaver.sh -p fire ; bash'
+Icon=/home/tomas/dev/bash/powersaver/cpu.png
+Type=Application
+Terminal=true
 ```
 
 ## License
