@@ -4,10 +4,8 @@
 
 It allows users to dynamically set CPU frequency limits and governors based on **predefined profiles**, optimizing for performance or power savings.
 
-![Snímek obrazovky z 2025-02-25 07-28-25](https://github.com/user-attachments/assets/9148d0b9-bd67-42ea-85a3-9c120f0af78e)
-![Snímek obrazovky z 2025-02-25 07-28-51](https://github.com/user-attachments/assets/05e2c02c-a267-4b8e-96df-2ff61454ef90)
-![Snímek obrazovky z 2025-02-25 07-29-23](https://github.com/user-attachments/assets/c0945f45-ad62-4b5d-a591-777f953c8278)
-
+![Snímek obrazovky z 2025-02-25 07-31-25](https://github.com/user-attachments/assets/6f5e66eb-81bf-43a7-94b6-ea355ab2294e)
+![Snímek obrazovky z 2025-02-25 07-31-45](https://github.com/user-attachments/assets/3532cf9a-76f6-4765-a5bb-fe9130e3536f)
 
 ## Requirements
 ```bash
