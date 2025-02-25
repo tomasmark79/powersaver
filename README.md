@@ -4,6 +4,11 @@
 
 It allows users to dynamically set CPU frequency limits and governors based on **predefined profiles**, optimizing for performance or power savings.
 
+![Snímek obrazovky z 2025-02-25 07-28-25](https://github.com/user-attachments/assets/9148d0b9-bd67-42ea-85a3-9c120f0af78e)
+![Snímek obrazovky z 2025-02-25 07-28-51](https://github.com/user-attachments/assets/05e2c02c-a267-4b8e-96df-2ff61454ef90)
+![Snímek obrazovky z 2025-02-25 07-29-23](https://github.com/user-attachments/assets/c0945f45-ad62-4b5d-a591-777f953c8278)
+
+
 ## Requirements
 ```bash
 sudo apt install cpupower
