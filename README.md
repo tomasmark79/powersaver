@@ -1,8 +1,6 @@
 # PowerSaver CPU Profile Manager
 
-`PowerSaver` is a Bash script application that manages CPU frequency and performance profiles for Linux systems using `cpupower`.  
-
-It allows users to dynamically set CPU frequency limits and governors based on **predefined profiles**, optimizing for performance or power savings.
+PowerSaver is a user script (`powersaver.sh`) that gives the user control to specify the power profile and manage performance strength and battery discharge rate using predefined profiles.
 
 ![Snímek obrazovky z 2025-02-25 07-31-25](https://github.com/user-attachments/assets/6f5e66eb-81bf-43a7-94b6-ea355ab2294e)
 ![Snímek obrazovky z 2025-02-25 07-31-45](https://github.com/user-attachments/assets/3532cf9a-76f6-4765-a5bb-fe9130e3536f)
