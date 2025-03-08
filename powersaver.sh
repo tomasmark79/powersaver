@@ -256,9 +256,19 @@ function apply_user_profile {
 prGreen "Current user: $USER"
 
 # Check cpupower installation
-if ! dpkg -l | grep cpupower >/dev/null; then
-    prRed "cpupower package is not installed. Please install it first."
-    prRed "Run: sudo apt install cpupower"
+if ! command -v cpupower &>/dev/null; then
+    prRed "cpupower is not installed. Please install the linux-tools package for your kernel."
+    if command -v apt &>/dev/null; then
+        prRed "For Debian/Ubuntu: sudo apt install linux-tools-common linux-tools-generic"
+    elif command -v dnf &>/dev/null; then
+        prRed "For Fedora/RHEL: sudo dnf install kernel-tools"
+    elif command -v pacman &>/dev/null; then
+        prRed "For Arch: sudo pacman -S linux-tools"
+    elif command -v zypper &>/dev/null; then
+        prRed "For openSUSE: sudo zypper install cpupower"
+    else
+        prRed "Please install cpupower using your distribution's package manager"
+    fi
     exit 1
 fi
 
